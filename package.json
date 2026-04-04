@@ -1,0 +1,18 @@
+{
+  "name": "psych-tests",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "docx": "^9.1.0",
+    "file-saver": "^2.0.5"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

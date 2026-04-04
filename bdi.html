@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Шкала депрессии Бека (BDI)</title>
+    <link rel="stylesheet" href="./src/styles/global.css" />
+    <link rel="stylesheet" href="./src/styles/bdi.css" />
+  </head>
+  <body>
+    <div class="layout layout--wide">
+      <nav class="breadcrumb">
+        <a href="./index.html">← Все тесты</a>
+      </nav>
+      <header class="header">
+        <h1>Шкала депрессии Бека (BDI)</h1>
+        <p class="lead">Beck Depression Inventory</p>
+        <p class="disclaimer">
+          <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
+          информационный характер и не заменяют очную консультацию врача или психолога.
+        </p>
+        <p class="privacy-note">
+          <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
+          расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
+          закрытия страницы введённые ответы в браузере не хранятся.
+        </p>
+      </header>
+
+      <section class="instruction">
+        <h2>Инструкция</h2>
+        <p>
+          В этом опроснике содержатся группы утверждений. Внимательно прочитайте каждую группу утверждений.
+          Затем определите в каждой группе одно утверждение, которое лучше всего соответствует тому, как Вы себя
+          чувствовали <strong>на этой неделе и сегодня</strong>. Отметьте выбранное утверждение. Если несколько
+          утверждений из одной группы кажутся Вам одинаково хорошо подходящими, отметьте каждое из них.
+        </p>
+      </section>
+
+      <div id="bdi-js-failed" class="bdi-alert" hidden>
+        <strong>Вопросы не загрузились.</strong> Страницу нужно открывать через локальный сервер разработки, а не как
+        файл с диска. В терминале в папке проекта выполните <code>npm run dev</code> и перейдите по адресу, который
+        покажет Vite (обычно <code>http://localhost:5173</code>), затем снова откройте этот тест.
+      </div>
+
+      <form id="bdi-form" class="bdi-form"></form>
+
+      <section class="results" id="results" hidden>
+        <h2>Результат</h2>
+        <div class="results__grid">
+          <div class="result-card">
+            <span class="result-card__label">Суммарный балл</span>
+            <span class="result-card__value" id="score-total">—</span>
+            <p class="result-card__hint" id="interpret-total"></p>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Когнитивно-аффективная субшкала (1–13)</span>
+            <span class="result-card__value" id="score-cog">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Соматическая субшкала (14–21)</span>
+            <span class="result-card__value" id="score-som">—</span>
+          </div>
+        </div>
+        <div class="results__actions">
+          <button type="button" class="btn btn--primary" id="btn-download">Скачать отчёт (Word)</button>
+        </div>
+      </section>
+
+      <footer class="footer footer--disclaimer">
+        Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
+      </footer>
+    </div>
+    <script>
+      (function () {
+        function check() {
+          var form = document.getElementById("bdi-form");
+          var warn = document.getElementById("bdi-js-failed");
+          if (form && warn && form.children.length === 0) {
+            warn.hidden = false;
+          }
+        }
+        window.addEventListener("load", function () {
+          setTimeout(check, 2000);
+        });
+      })();
+    </script>
+    <script type="module" src="./src/bdi.js"></script>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Психологические тесты</title>
+    <link rel="stylesheet" href="./src/styles/global.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <header class="header">
+        <h1>Психологические тесты</h1>
+        <p class="lead">Выберите опросник для самооценки. Результаты можно сохранить в документ Word.</p>
+        <p class="disclaimer">
+          <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
+          информационный характер и не заменяют очную консультацию врача или психолога.
+        </p>
+        <p class="privacy-note">
+          <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
+          расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
+          закрытия страницы введённые ответы в браузере не хранятся.
+        </p>
+      </header>
+      <main>
+        <div class="test-search">
+          <label class="test-search__label" for="test-search-input">Поиск по названию</label>
+          <input
+            class="test-search__input"
+            type="search"
+            id="test-search-input"
+            placeholder="Например: депрессия, тревога, BDI…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <p class="test-search__empty" id="test-search-empty" hidden>Ничего не найдено. Попробуйте другой запрос.</p>
+        <ul class="test-list" id="test-list">
+          <li>
+            <a class="test-card" href="./bdi.html">
+              <span class="test-card__title">Шкала депрессии Бека (BDI)</span>
+              <span class="test-card__meta">1–21 · сумма 0–62 · субшкалы</span>
+            </a>
+          </li>
+          <li>
+            <a class="test-card" href="./bai.html">
+              <span class="test-card__title">Шкала тревоги Бека (BAI)</span>
+              <span class="test-card__meta">1–21 · сумма 0–63</span>
+            </a>
+          </li>
+        </ul>
+      </main>
+      <footer class="footer footer--disclaimer">
+        Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
+      </footer>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

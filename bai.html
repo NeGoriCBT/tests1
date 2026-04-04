@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Шкала тревоги Бека (BAI)</title>
+    <link rel="stylesheet" href="./src/styles/global.css" />
+    <link rel="stylesheet" href="./src/styles/bai.css" />
+  </head>
+  <body>
+    <div class="layout layout--wide">
+      <nav class="breadcrumb">
+        <a href="./index.html">← Все тесты</a>
+      </nav>
+      <header class="header">
+        <h1>Шкала тревоги Бека (BAI)</h1>
+        <p class="lead">Beck Anxiety Inventory</p>
+        <p class="disclaimer">
+          <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
+          информационный характер и не заменяют очную консультацию врача или психолога.
+        </p>
+        <p class="privacy-note">
+          <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
+          расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
+          закрытия страницы введённые ответы в браузере не хранятся.
+        </p>
+      </header>
+
+      <section class="instruction">
+        <h2>Инструкция</h2>
+        <p>
+          Данный список содержит наиболее распространённые симптомы тревоги. Пожалуйста, тщательно изучите каждый
+          номер. Отметьте, насколько Вас беспокоил каждый из этих симптомов в течение
+          <strong>последней недели</strong>, включая сегодняшний день, поставив отметку в соответствующей колонке
+          справа.
+        </p>
+        <div class="bai-intro">
+          <h3>Интерпретация</h3>
+          <p>Подсчёт производится простым суммированием баллов по всей шкале (1–21).</p>
+          <ul>
+            <li>значение до 21 балла включительно свидетельствует о незначительном уровне тревоги;</li>
+            <li>значение от 22 до 35 баллов означает среднюю выраженность тревоги;</li>
+            <li>
+              значение 36 баллов и выше (при максимуме 63 балла) свидетельствует об очень высокой тревоге.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <div id="bai-js-failed" class="bdi-alert" hidden>
+        <strong>Вопросы не загрузились.</strong> Страницу нужно открывать через локальный сервер разработки, а не как
+        файл с диска. В терминале в папке проекта выполните <code>npm run dev</code> и перейдите по адресу, который
+        покажет Vite (обычно <code>http://localhost:5173</code>), затем снова откройте этот тест.
+      </div>
+
+      <form id="bai-form" class="bdi-form"></form>
+
+      <section class="results results--bai" id="results" hidden>
+        <h2>Результат</h2>
+        <div class="results__grid">
+          <div class="result-card">
+            <span class="result-card__label">Суммарный балл (0–63)</span>
+            <span class="result-card__value" id="score-total">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Интерпретация</span>
+            <p class="result-card__hint" id="interpret-total"></p>
+          </div>
+        </div>
+        <div class="results__actions">
+          <button type="button" class="btn btn--primary" id="btn-download">Скачать отчёт (Word)</button>
+        </div>
+      </section>
+
+      <footer class="footer footer--disclaimer">
+        Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
+      </footer>
+    </div>
+    <script>
+      (function () {
+        function check() {
+          var form = document.getElementById("bai-form");
+          var warn = document.getElementById("bai-js-failed");
+          if (form && warn && form.children.length === 0) {
+            warn.hidden = false;
+          }
+        }
+        window.addEventListener("load", function () {
+          setTimeout(check, 2000);
+        });
+      })();
+    </script>
+    <script type="module" src="./src/bai.js"></script>
+  </body>
+</html>
