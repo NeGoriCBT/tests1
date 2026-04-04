@@ -1,10 +1,8 @@
 import { defineConfig } from "vite";
 
-/** Для GitHub Pages: сайт в подкаталоге /tests1/ */
-const BASE = "/tests1/";
-
-export default defineConfig(({ command }) => ({
-  base: command === "build" ? BASE : "/",
+/** Относительные пути — работают и на GitHub Pages (/repo/...), и локально. */
+export default defineConfig({
+  base: "./",
   build: {
     rollupOptions: {
       input: {
@@ -14,4 +12,4 @@ export default defineConfig(({ command }) => ({
       },
     },
   },
-}));
+});

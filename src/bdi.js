@@ -302,8 +302,3 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 });
 
 renderForm();
-
-var hint = document.getElementById("bdi-js-failed");
-if (hint) {
-  hint.hidden = true;
-}

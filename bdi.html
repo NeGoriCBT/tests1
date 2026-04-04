@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="./src/styles/bdi.css" />
   </head>
   <body>
+    <noscript>
+      <div class="noscript-banner">
+        Для работы опросника включите JavaScript в настройках браузера.
+      </div>
+    </noscript>
     <div class="layout layout--wide">
       <nav class="breadcrumb">
         <a href="./index.html">← Все тесты</a>
@@ -36,12 +41,6 @@
           утверждений из одной группы кажутся Вам одинаково хорошо подходящими, отметьте каждое из них.
         </p>
       </section>
-
-      <div id="bdi-js-failed" class="bdi-alert" hidden>
-        <strong>Вопросы не загрузились.</strong> Страницу нужно открывать через локальный сервер разработки, а не как
-        файл с диска. В терминале в папке проекта выполните <code>npm run dev</code> и перейдите по адресу, который
-        покажет Vite (обычно <code>http://localhost:5173</code>), затем снова откройте этот тест.
-      </div>
 
       <form id="bdi-form" class="bdi-form"></form>
 
@@ -71,20 +70,6 @@
         Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
       </footer>
     </div>
-    <script>
-      (function () {
-        function check() {
-          var form = document.getElementById("bdi-form");
-          var warn = document.getElementById("bdi-js-failed");
-          if (form && warn && form.children.length === 0) {
-            warn.hidden = false;
-          }
-        }
-        window.addEventListener("load", function () {
-          setTimeout(check, 2000);
-        });
-      })();
-    </script>
     <script type="module" src="./src/bdi.js"></script>
   </body>
 </html>

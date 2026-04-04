@@ -222,8 +222,3 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 });
 
 renderForm();
-
-const hint = document.getElementById("bai-js-failed");
-if (hint) {
-  hint.hidden = true;
-}

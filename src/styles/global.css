@@ -179,6 +179,16 @@ body {
   font-weight: 600;
 }
 
+.noscript-banner {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #78350f;
+  background: #fffbeb;
+  border-bottom: 1px solid #fcd34d;
+}
+
 .footer {
   margin-top: 3rem;
   font-size: 0.8rem;

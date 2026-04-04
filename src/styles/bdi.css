@@ -1,20 +1,3 @@
-.bdi-alert {
-  padding: 1rem 1.15rem;
-  margin-bottom: 1.25rem;
-  border-radius: var(--radius);
-  border: 1px solid #f59e0b;
-  background: #fffbeb;
-  color: #78350f;
-  font-size: 0.95rem;
-}
-
-.bdi-alert code {
-  font-size: 0.88em;
-  background: rgb(255 255 255 / 0.7);
-  padding: 0.1em 0.35em;
-  border-radius: 4px;
-}
-
 .instruction {
   background: var(--surface);
   border: 1px solid var(--border);

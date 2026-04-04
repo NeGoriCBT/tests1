@@ -1,9 +1,4 @@
-# Собирает dist и пушит в ветку gh-pages (готовая статика Vite).
-#
-# После первого успешного запуска: Settings → Pages → Build and deployment →
-# Source: Deploy from a branch → Branch: gh-pages, folder: / (root).
-# (Если выбрано «GitHub Actions» — переключите на ветку gh-pages.)
-
+# Сборка в папку docs/ и публикация на gh-pages (альтернатива — закоммиченная docs/ + Pages: main → /docs).
 name: Deploy to GitHub Pages
 
 on:
@@ -27,10 +22,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build
-      - name: Push dist to gh-pages branch
+      - run: npm run build:docs
+      - name: Push docs to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./docs
           force_orphan: true
