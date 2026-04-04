@@ -1,5 +1,8 @@
 import { saveAs } from "file-saver";
 import { HDRS_ITEMS, interpretHdrs } from "./hdrs-data.js";
+import { getSelectedSpecialistName } from "./specialists.js";
+import { buildWordReportHeader } from "./word-report-header.js";
+import { initSpecialistModal } from "./specialist-modal.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   const item = HDRS_ITEMS.find((i) => i.id === row.id);
@@ -153,17 +156,20 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     alert("Сначала заполните опросник и нажмите «Подсчитать результат».");
     return;
   }
+  const specialistName = getSelectedSpecialistName();
+  if (!specialistName) {
+    alert("Выберите специалиста кнопкой «Специалист» вверху страницы.");
+    return;
+  }
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, HighlightColor } = await import("docx");
   const { perItem, total } = JSON.parse(raw);
   const dateStr = new Date().toLocaleString("ru-RU");
 
   const children = [
+    ...buildWordReportHeader(Paragraph, TextRun, { dateStr, specialistName }),
     new Paragraph({
       text: "Шкала Гамильтона (HDRS / HAM-D-17)",
       heading: HeadingLevel.HEADING_1,
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: `Дата: ${dateStr}`, italics: true })],
     }),
     new Paragraph({
       children: [
@@ -225,3 +231,4 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 });
 
 renderForm();
+initSpecialistModal();

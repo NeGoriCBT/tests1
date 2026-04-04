@@ -10,6 +10,7 @@ export default defineConfig({
         bdi: "bdi.html",
         bai: "bai.html",
         hdrs: "hdrs.html",
+        hars: "hars.html",
       },
     },
   },

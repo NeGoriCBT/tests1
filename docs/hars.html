@@ -4,11 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
-    <title>Шкала Гамильтона (HDRS)</title>
-    <link rel="stylesheet" href="./src/styles/global.css" />
-    <link rel="stylesheet" href="./src/styles/bdi.css" />
-    <link rel="stylesheet" href="./src/styles/hdrs.css" />
-    <link rel="stylesheet" href="./src/styles/specialist-modal.css" />
+    <title>Шкала Гамильтона — тревога (HARS)</title>
+    <script type="module" crossorigin src="./assets/hars-BaYvBgYj.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/global-BMp_P3Od.js">
+    <link rel="modulepreload" crossorigin href="./assets/specialist-modal-Bwv6498z.js">
+    <link rel="stylesheet" crossorigin href="./assets/global-CmXb45GI.css">
+    <link rel="stylesheet" crossorigin href="./assets/specialist-modal-DShnoFH6.css">
+    <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
+    <link rel="stylesheet" crossorigin href="./assets/hdrs-B8T5AqVa.css">
   </head>
   <body>
     <script>
@@ -17,7 +20,7 @@
           if (!location.hostname.endsWith("github.io")) return;
           if (location.pathname.includes("/docs/")) return;
           if (document.head.querySelector('script[src*="assets/"]')) return;
-          location.replace(new URL("docs/hdrs.html", location.href).href);
+          location.replace(new URL("docs/hars.html", location.href).href);
         }
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
@@ -48,8 +51,8 @@
         </div>
       </nav>
       <header class="header">
-        <h1>Шкала Гамильтона для оценки депрессии (HDRS)</h1>
-        <p class="lead">Hamilton Depression Rating Scale, 17 пунктов</p>
+        <h1>Шкала Гамильтона для оценки тревоги (HARS)</h1>
+        <p class="lead">Hamilton Anxiety Rating Scale, 14 пунктов</p>
         <p class="disclaimer">
           <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
           информационный характер и не заменяют очную консультацию врача или психолога.
@@ -70,13 +73,13 @@
         </p>
       </section>
 
-      <form id="hdrs-form" class="bdi-form"></form>
+      <form id="hars-form" class="bdi-form"></form>
 
       <section class="results results--bai" id="results" hidden>
         <h2>Результат</h2>
         <div class="results__grid">
           <div class="result-card">
-            <span class="result-card__label">Суммарный балл (0–52)</span>
+            <span class="result-card__label">Суммарный балл (0–56)</span>
             <span class="result-card__value" id="score-total">—</span>
           </div>
           <div class="result-card">
@@ -111,6 +114,5 @@
       </div>
     </div>
 
-    <script type="module" src="./src/hdrs.js"></script>
   </body>
 </html>

@@ -1,5 +1,8 @@
 import { saveAs } from "file-saver";
 import { BDI_ITEMS, interpretTotal } from "./bdi-data.js";
+import { getSelectedSpecialistName } from "./specialists.js";
+import { buildWordReportHeader } from "./word-report-header.js";
+import { initSpecialistModal } from "./specialist-modal.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   const item = BDI_ITEMS.find((i) => i.id === row.id);
@@ -217,17 +220,20 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     alert("Сначала заполните опросник и нажмите «Подсчитать результат».");
     return;
   }
+  const specialistName = getSelectedSpecialistName();
+  if (!specialistName) {
+    alert("Выберите специалиста кнопкой «Специалист» вверху страницы.");
+    return;
+  }
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, HighlightColor } = await import("docx");
   const { perItem, total, cog, som } = JSON.parse(raw);
   const dateStr = new Date().toLocaleString("ru-RU");
 
   const children = [
+    ...buildWordReportHeader(Paragraph, TextRun, { dateStr, specialistName }),
     new Paragraph({
       text: "Шкала депрессии Бека (BDI)",
       heading: HeadingLevel.HEADING_1,
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: `Дата: ${dateStr}`, italics: true })],
     }),
     new Paragraph({
       children: [
@@ -302,3 +308,4 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 });
 
 renderForm();
+initSpecialistModal();

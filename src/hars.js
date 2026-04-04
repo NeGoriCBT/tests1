@@ -1,11 +1,11 @@
 import { saveAs } from "file-saver";
+import { HARS_ITEMS, interpretHars } from "./hars-data.js";
 import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
-import { BAI_ITEMS, BAI_SCALE, interpretBai } from "./bai-data.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
-  const item = BAI_ITEMS.find((i) => i.id === row.id);
+  const item = HARS_ITEMS.find((i) => i.id === row.id);
   if (!item) return [];
 
   const out = [];
@@ -16,13 +16,20 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   );
   out.push(
     new Paragraph({
-      children: [new TextRun({ text: item.text, italics: true })],
+      children: [new TextRun({ text: item.title, bold: true })],
     }),
   );
+  if (item.hint) {
+    out.push(
+      new Paragraph({
+        children: [new TextRun({ text: item.hint, italics: true })],
+      }),
+    );
+  }
 
   const selected = row.score;
 
-  BAI_SCALE.forEach((opt) => {
+  item.options.forEach((opt) => {
     const isSelected = selected === opt.score;
     const line = `${opt.score} — ${opt.text}`;
     out.push(
@@ -49,61 +56,56 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   return out;
 }
 
-const form = document.getElementById("bai-form");
+const form = document.getElementById("hars-form");
 const resultsEl = document.getElementById("results");
 
 function renderForm() {
-  const wrap = document.createElement("div");
-  wrap.className = "bai-table-wrap";
+  HARS_ITEMS.forEach((item) => {
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "bdi-item";
+    fieldset.dataset.itemId = String(item.id);
 
-  const table = document.createElement("table");
-  table.className = "bai-table";
-  table.setAttribute("role", "grid");
+    const numEl = document.createElement("div");
+    numEl.className = "bdi-item__number";
+    numEl.id = `hars-heading-${item.id}`;
+    numEl.textContent = String(item.id);
+    fieldset.setAttribute("aria-labelledby", numEl.id);
+    fieldset.appendChild(numEl);
 
-  const thead = document.createElement("thead");
-  const hr = document.createElement("tr");
-  const hSym = document.createElement("th");
-  hSym.textContent = "Симптом";
-  hr.appendChild(hSym);
-  BAI_SCALE.forEach((col) => {
-    const th = document.createElement("th");
-    th.textContent = col.text;
-    hr.appendChild(th);
-  });
-  thead.appendChild(hr);
-  table.appendChild(thead);
+    const titleEl = document.createElement("div");
+    titleEl.className = "hdrs-item-title";
+    titleEl.textContent = item.title;
+    fieldset.appendChild(titleEl);
 
-  const tbody = document.createElement("tbody");
-  BAI_ITEMS.forEach((item) => {
-    const tr = document.createElement("tr");
-    const th = document.createElement("th");
-    th.scope = "row";
-    th.innerHTML = `<span class="bai-num">${item.id}.</span> ${item.text}`;
-    tr.appendChild(th);
+    if (item.hint) {
+      const hp = document.createElement("p");
+      hp.className = "hdrs-item-hint";
+      hp.textContent = item.hint;
+      fieldset.appendChild(hp);
+    }
 
-    BAI_SCALE.forEach((col) => {
-      const td = document.createElement("td");
-      const id = `bai-${item.id}-${col.score}`;
-      const lab = document.createElement("label");
-      lab.setAttribute("for", id);
-      const inp = document.createElement("input");
-      inp.type = "radio";
-      inp.name = `bai-${item.id}`;
-      inp.value = String(col.score);
-      inp.id = id;
-      inp.required = true;
-      lab.appendChild(inp);
-      td.appendChild(lab);
-      tr.appendChild(td);
+    item.options.forEach((opt, idx) => {
+      const id = `hars-${item.id}-${idx}`;
+      const wrap = document.createElement("label");
+      wrap.className = "bdi-option";
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `hars-${item.id}`;
+      input.value = String(opt.score);
+      input.id = id;
+      input.required = true;
+      const span = document.createElement("span");
+      span.textContent = `${opt.score} — ${opt.text}`;
+      wrap.appendChild(input);
+      wrap.appendChild(span);
+      fieldset.appendChild(wrap);
     });
-    tbody.appendChild(tr);
+
+    form.appendChild(fieldset);
   });
-  table.appendChild(tbody);
-  wrap.appendChild(table);
-  form.appendChild(wrap);
 
   const actions = document.createElement("div");
-  actions.className = "bai-form-actions";
+  actions.className = "form-actions";
   actions.innerHTML = '<button type="submit" class="btn btn--primary">Подсчитать результат</button>';
   form.appendChild(actions);
 }
@@ -112,14 +114,17 @@ function collectAnswers() {
   const perItem = [];
   const missing = [];
 
-  BAI_ITEMS.forEach((item) => {
-    const sel = form.querySelector(`input[name="bai-${item.id}"]:checked`);
+  HARS_ITEMS.forEach((item) => {
+    const sel = form.querySelector(`input[name="hars-${item.id}"]:checked`);
     if (!sel) {
       missing.push(item.id);
-      perItem.push({ id: item.id, score: null, text: item.text });
+      perItem.push({ id: item.id, score: null, title: item.title });
     } else {
-      const score = Number(sel.value);
-      perItem.push({ id: item.id, score, text: item.text });
+      perItem.push({
+        id: item.id,
+        score: Number(sel.value),
+        title: item.title,
+      });
     }
   });
 
@@ -131,14 +136,14 @@ form.addEventListener("submit", (e) => {
   const { perItem, missing } = collectAnswers();
 
   if (missing.length > 0) {
-    alert(`Отметьте ответ по каждому номеру 1–21. Не заполнено: ${missing.join(", ")}`);
+    alert(`Отметьте ответ по каждому номеру 1–14. Не заполнено: ${missing.join(", ")}`);
     return;
   }
 
   const total = perItem.reduce((a, r) => a + r.score, 0);
 
   document.getElementById("score-total").textContent = String(total);
-  document.getElementById("interpret-total").textContent = interpretBai(total);
+  document.getElementById("interpret-total").textContent = interpretHars(total);
 
   resultsEl.hidden = false;
   resultsEl.dataset.payload = JSON.stringify({ perItem, total });
@@ -163,7 +168,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
   const children = [
     ...buildWordReportHeader(Paragraph, TextRun, { dateStr, specialistName }),
     new Paragraph({
-      text: "Шкала тревоги Бека (BAI)",
+      text: "Шкала Гамильтона для оценки тревоги (HARS / HAM-A)",
       heading: HeadingLevel.HEADING_1,
     }),
     new Paragraph({
@@ -189,30 +194,29 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: "Суммарный балл (0–63): ", bold: true }),
+        new TextRun({ text: "Суммарный балл (0–56): ", bold: true }),
         new TextRun(String(total)),
       ],
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: "Интерпретация: ", bold: true }),
-        new TextRun(interpretBai(total)),
+        new TextRun({ text: "Интерпретация (ориентировочно): ", bold: true }),
+        new TextRun(interpretHars(total)),
       ],
     }),
     new Paragraph({ text: "" }),
     new Paragraph({
-      text: "Шкала интерпретации",
+      text: "Ориентировочная шкала интерпретации суммы баллов",
       heading: HeadingLevel.HEADING_2,
     }),
-    new Paragraph(
-      "Подсчёт производится простым суммированием баллов по всей шкале (1–21).",
-    ),
-    new Paragraph("До 21 балла включительно — незначительный уровень тревоги."),
-    new Paragraph("От 22 до 35 баллов — средняя выраженность тревоги."),
-    new Paragraph("36 баллов и выше (при максимуме 63 балла) — очень высокая тревога."),
+    new Paragraph("0–6 — минимальная выраженность тревоги (условно)."),
+    new Paragraph("7–17 — лёгкая тревога (условно)."),
+    new Paragraph("18–24 — лёгкая — умеренная тревога (условно)."),
+    new Paragraph("25–30 — умеренная — выраженная тревога (условно)."),
+    new Paragraph("31–56 — тяжёлая тревога (условно)."),
     new Paragraph({ text: "" }),
     new Paragraph({
-      text: "Ответы (1–21)",
+      text: "Ответы (1–14)",
       heading: HeadingLevel.HEADING_2,
     }),
   ];
@@ -224,7 +228,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
   const doc = new Document({ sections: [{ children }] });
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, `BAI_${new Date().toISOString().slice(0, 10)}.docx`);
+  saveAs(blob, `HARS_${new Date().toISOString().slice(0, 10)}.docx`);
 });
 
 renderForm();
