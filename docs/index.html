@@ -10,6 +10,21 @@
     <link rel="stylesheet" crossorigin href="./assets/global-CmXb45GI.css">
   </head>
   <body>
+    <script>
+      (function () {
+        function redirectIfSourceOnly() {
+          if (!location.hostname.endsWith("github.io")) return;
+          if (location.pathname.includes("/docs/")) return;
+          if (document.head.querySelector('script[src*="assets/"]')) return;
+          location.replace(new URL("docs/index.html", location.href).href);
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
+        } else {
+          redirectIfSourceOnly();
+        }
+      })();
+    </script>
     <noscript>
       <div class="noscript-banner">
         Для работы сайта включите JavaScript в настройках браузера.

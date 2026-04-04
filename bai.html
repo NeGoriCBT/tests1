@@ -9,6 +9,21 @@
     <link rel="stylesheet" href="./src/styles/bai.css" />
   </head>
   <body>
+    <script>
+      (function () {
+        function redirectIfSourceOnly() {
+          if (!location.hostname.endsWith("github.io")) return;
+          if (location.pathname.includes("/docs/")) return;
+          if (document.head.querySelector('script[src*="assets/"]')) return;
+          location.replace(new URL("docs/bai.html", location.href).href);
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
+        } else {
+          redirectIfSourceOnly();
+        }
+      })();
+    </script>
     <noscript>
       <div class="noscript-banner">
         Для работы опросника включите JavaScript в настройках браузера.
