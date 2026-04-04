@@ -9,6 +9,7 @@ export default defineConfig({
         main: "index.html",
         bdi: "bdi.html",
         bai: "bai.html",
+        hdrs: "hdrs.html",
       },
     },
   },

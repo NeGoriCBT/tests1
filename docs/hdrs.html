@@ -4,11 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
-    <title>Шкала депрессии Бека (BDI)</title>
-    <script type="module" crossorigin src="./assets/bdi-DmrMfSFO.js"></script>
+    <title>Шкала Гамильтона (HDRS)</title>
+    <script type="module" crossorigin src="./assets/hdrs-Dv12jEge.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/global-BMp_P3Od.js">
     <link rel="modulepreload" crossorigin href="./assets/FileSaver.min-BIk8JBJL.js">
     <link rel="stylesheet" crossorigin href="./assets/global-CmXb45GI.css">
+    <link rel="stylesheet" crossorigin href="./assets/hdrs-B8T5AqVa.css">
     <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
   </head>
   <body>
@@ -18,7 +19,7 @@
           if (!location.hostname.endsWith("github.io")) return;
           if (location.pathname.includes("/docs/")) return;
           if (document.head.querySelector('script[src*="assets/"]')) return;
-          location.replace(new URL("docs/bdi.html", location.href).href);
+          location.replace(new URL("docs/hdrs.html", location.href).href);
         }
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
@@ -37,8 +38,8 @@
         <a href="./index.html">← Все тесты</a>
       </nav>
       <header class="header">
-        <h1>Шкала депрессии Бека (BDI)</h1>
-        <p class="lead">Beck Depression Inventory</p>
+        <h1>Шкала Гамильтона для оценки депрессии (HDRS)</h1>
+        <p class="lead">Hamilton Depression Rating Scale, 17 пунктов</p>
         <p class="disclaimer">
           <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
           информационный характер и не заменяют очную консультацию врача или психолога.
@@ -53,30 +54,24 @@
       <section class="instruction">
         <h2>Инструкция</h2>
         <p>
-          В этом опроснике содержатся группы утверждений. Внимательно прочитайте каждую группу утверждений.
-          Затем определите в каждой группе одно утверждение, которое лучше всего соответствует тому, как Вы себя
-          чувствовали <strong>на этой неделе и сегодня</strong>. Отметьте выбранное утверждение. Если несколько
-          утверждений из одной группы кажутся Вам одинаково хорошо подходящими, отметьте каждое из них.
+          Оригинальная шкала предназначена для оценки специалистом. В данной форме каждый пункт можно использовать для
+          <strong>самооценки по описанию</strong>: внимательно прочитайте формулировки и отметьте <strong>один</strong>
+          вариант в каждом номере, который лучше соответствует вашему состоянию за последние дни (в том числе сегодня).
         </p>
       </section>
 
-      <form id="bdi-form" class="bdi-form"></form>
+      <form id="hdrs-form" class="bdi-form"></form>
 
-      <section class="results" id="results" hidden>
+      <section class="results results--bai" id="results" hidden>
         <h2>Результат</h2>
         <div class="results__grid">
           <div class="result-card">
-            <span class="result-card__label">Суммарный балл</span>
+            <span class="result-card__label">Суммарный балл (0–52)</span>
             <span class="result-card__value" id="score-total">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Интерпретация (ориентировочно)</span>
             <p class="result-card__hint" id="interpret-total"></p>
-          </div>
-          <div class="result-card">
-            <span class="result-card__label">Когнитивно-аффективная субшкала (1–13)</span>
-            <span class="result-card__value" id="score-cog">—</span>
-          </div>
-          <div class="result-card">
-            <span class="result-card__label">Соматическая субшкала (14–21)</span>
-            <span class="result-card__value" id="score-som">—</span>
           </div>
         </div>
         <div class="results__actions">
