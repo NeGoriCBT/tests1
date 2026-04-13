@@ -164,7 +164,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
   }
   const specialistName = getSelectedSpecialistName();
   if (!specialistName) {
-    alert("Выберите специалиста кнопкой «Специалист» (блок под инструкцией).");
+    alert("Сначала выберите специалиста в блоке «ВЫБЕРИТЕ СПЕЦИАЛИСТА» (кнопка «Специалист»).");
     return;
   }
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, HighlightColor } = await import("docx");

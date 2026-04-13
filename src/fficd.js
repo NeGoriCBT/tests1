@@ -1,21 +1,19 @@
 import { saveAs } from "file-saver";
 import {
-  SCL90_ITEM_TEXTS,
-  SCL90_OPTION_LABELS,
-  SCL90_SCALES,
-  computeScl90Profile,
-  formatMean,
-} from "./scl90-data.js";
+  FFICD_ITEM_TEXTS,
+  FFICD_N,
+  FFICD_SCALE,
+  computeFficdProfile,
+  formatFficdMean,
+} from "./fficd-data.js";
 import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
 import { initScrollNavButton } from "./scroll-nav.js";
 
-const N = 90;
-
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
-  const text = SCL90_ITEM_TEXTS[row.id - 1];
+  const text = FFICD_ITEM_TEXTS[row.id - 1];
   if (!text) return [];
 
   const out = [];
@@ -27,7 +25,7 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   out.push(new Paragraph({ children: [new TextRun({ text, bold: true })] }));
 
   const selected = row.score;
-  SCL90_OPTION_LABELS.forEach((opt) => {
+  FFICD_SCALE.forEach((opt) => {
     const isSelected = selected === opt.score;
     const line = `${opt.score} — ${opt.text}`;
     out.push(
@@ -53,7 +51,7 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   return out;
 }
 
-const form = document.getElementById("scl90-form");
+const form = document.getElementById("fficd-form");
 const resultsEl = document.getElementById("results");
 
 function renderForm() {
@@ -62,38 +60,38 @@ function renderForm() {
   head.innerHTML = `
     <span>№</span>
     <span>Утверждение</span>
-    <span>Совсем<br/>нет</span>
-    <span>Немного</span>
-    <span>Умеренно</span>
-    <span>Сильно</span>
-    <span>Очень<br/>сильно</span>
+    <span>1</span>
+    <span>2</span>
+    <span>3</span>
+    <span>4</span>
+    <span>5</span>
   `;
   form.appendChild(head);
 
-  for (let i = 1; i <= N; i += 1) {
+  for (let i = 1; i <= FFICD_N; i += 1) {
     const fieldset = document.createElement("fieldset");
     fieldset.className = "scl90-item";
 
     const num = document.createElement("div");
     num.className = "scl90-item__number";
-    num.id = `scl90-h-${i}`;
+    num.id = `fficd-h-${i}`;
     num.textContent = String(i);
     fieldset.setAttribute("aria-labelledby", num.id);
 
     const textP = document.createElement("p");
     textP.className = "scl90-item__text";
-    textP.textContent = SCL90_ITEM_TEXTS[i - 1];
+    textP.textContent = FFICD_ITEM_TEXTS[i - 1];
 
     const optsWrap = document.createElement("div");
     optsWrap.className = "scl90-item__opts";
 
-    SCL90_OPTION_LABELS.forEach((opt, idx) => {
-      const id = `scl90-${i}-${idx}`;
+    FFICD_SCALE.forEach((opt, idx) => {
+      const id = `fficd-${i}-${idx}`;
       const label = document.createElement("label");
       label.className = "scl90-opt";
       const input = document.createElement("input");
       input.type = "radio";
-      input.name = `scl90-${i}`;
+      input.name = `fficd-${i}`;
       input.value = String(opt.score);
       input.id = id;
       input.required = true;
@@ -120,8 +118,8 @@ function renderForm() {
 function collectScores() {
   const scores = [];
   const missing = [];
-  for (let i = 1; i <= N; i += 1) {
-    const sel = form.querySelector(`input[name="scl90-${i}"]:checked`);
+  for (let i = 1; i <= FFICD_N; i += 1) {
+    const sel = form.querySelector(`input[name="fficd-${i}"]:checked`);
     if (!sel) {
       missing.push(i);
       scores.push(null);
@@ -138,32 +136,54 @@ form.addEventListener("submit", (e) => {
   if (missing.length > 0) {
     scrollToQuestionThenAlert(
       missing[0],
-      "scl90",
-      `Отметьте ответ по каждому пункту 1–90. Не заполнено: ${missing.slice(0, 15).join(", ")}${missing.length > 15 ? "…" : ""}`,
+      "fficd",
+      `Отметьте ответ по каждому пункту 1–121. Не заполнено: ${missing.slice(0, 12).join(", ")}${missing.length > 12 ? "…" : ""}`,
     );
     return;
   }
 
-  const profile = computeScl90Profile(scores);
-  const { gsi, psi, pdsi, scaleResults, totalSum } = profile;
+  const profile = computeFficdProfile(scores);
 
-  document.getElementById("score-gsi").textContent = formatMean(gsi);
-  document.getElementById("score-psi").textContent = String(psi);
-  document.getElementById("score-pdsi").textContent =
-    pdsi == null ? "—" : formatMean(pdsi);
-  document.getElementById("score-raw").textContent = String(totalSum);
+  document.getElementById("fficd-sum").textContent = String(profile.totalSum);
+  document.getElementById("fficd-mean-all").textContent = formatFficdMean(profile.overallMean);
 
-  const tbody = document.getElementById("scl90-scale-tbody");
-  tbody.replaceChildren();
-  scaleResults.forEach((row) => {
+  const domWrap = document.getElementById("fficd-domains-grid");
+  domWrap.replaceChildren();
+  profile.domains.forEach((d) => {
+    const card = document.createElement("div");
+    card.className = "result-card";
+    card.innerHTML = `
+      <span class="result-card__label">${d.code} · ${d.name}</span>
+      <span class="result-card__value">${formatFficdMean(d.mean)}</span>
+      <span class="result-card__hint">n = ${d.n}</span>
+    `;
+    domWrap.appendChild(card);
+  });
+
+  const subTbody = document.getElementById("fficd-sub-tbody");
+  subTbody.replaceChildren();
+  profile.subdomains.forEach((row) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${row.code}</td>
+      <td>${row.domainCode}</td>
       <td>${row.name}</td>
       <td>${row.n}</td>
-      <td>${formatMean(row.mean)}</td>
+      <td>${formatFficdMean(row.mean)}</td>
     `;
-    tbody.appendChild(tr);
+    subTbody.appendChild(tr);
+  });
+
+  const nuTbody = document.getElementById("fficd-nu-tbody");
+  nuTbody.replaceChildren();
+  profile.nuances.forEach((row) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.domainCode}</td>
+      <td>${row.name}</td>
+      <td>${row.n}</td>
+      <td>${formatFficdMean(row.mean)}</td>
+    `;
+    nuTbody.appendChild(tr);
   });
 
   resultsEl.hidden = false;
@@ -198,17 +218,18 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
   const { scores, profile } = JSON.parse(raw);
   const dateStr = new Date().toLocaleString("ru-RU");
+  const fm = formatFficdMean;
 
   const children = [
     ...buildWordReportHeader(Paragraph, TextRun, { dateStr, specialistName }),
     new Paragraph({
-      text: "Опросник выраженности психопатологической симптоматики (SCL-90-R)",
+      text: "Пятифакторный личностный опросник для МКБ-11 (FFiCD)",
       heading: HeadingLevel.HEADING_1,
     }),
     new Paragraph({
       children: [
         new TextRun({
-          text: "Symptom Checklist-90-Revised (Derogatis L.R. et al., 1974). Адаптация Н.В. Тарабриной и др.",
+          text: "The Five-Factor Personality Inventory for ICD-11. Русская версия (figshare и др.).",
           italics: true,
         }),
       ],
@@ -216,7 +237,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     new Paragraph({
       children: [
         new TextRun({
-          text: "Важно: опросник не ставит диагноз и не является основанием для самолечения. Результаты носят информационный характер и не заменяют очную консультацию специалиста.",
+          text: "Важно: опросник не ставит диагноз; интерпретация — в клиническом контексте специалиста.",
           italics: true,
         }),
       ],
@@ -230,72 +251,106 @@ document.getElementById("btn-download").addEventListener("click", async () => {
       ],
     }),
     new Paragraph({ text: "" }),
-    new Paragraph({ text: "Итоговые индексы", heading: HeadingLevel.HEADING_2 }),
+    new Paragraph({ text: "Сводка", heading: HeadingLevel.HEADING_2 }),
     new Paragraph({
       children: [
-        new TextRun({ text: "Сумма баллов (0–360): ", bold: true }),
+        new TextRun({ text: "Сумма баллов (121–605): ", bold: true }),
         new TextRun(String(profile.totalSum)),
       ],
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: "GSI (General Symptomatic Index): ", bold: true }),
-        new TextRun(formatMean(profile.gsi)),
-      ],
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "PSI (количество пунктов с оценкой 1–4): ", bold: true }),
-        new TextRun(String(profile.psi)),
-      ],
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "PDSI (Positive Distress Symptomatic Index): ", bold: true }),
-        new TextRun(profile.pdsi == null ? "—" : formatMean(profile.pdsi)),
+        new TextRun({ text: "Среднее по всем пунктам: ", bold: true }),
+        new TextRun(fm(profile.overallMean)),
       ],
     }),
     new Paragraph({ text: "" }),
-    new Paragraph({ text: "Средние по шкалам", heading: HeadingLevel.HEADING_2 }),
+    new Paragraph({ text: "Домены", heading: HeadingLevel.HEADING_2 }),
   ];
 
-  const tableRows = [
+  const domainRows = [
     new TableRow({
       children: [
-        new TableCell({ children: [new Paragraph("Шкала")] }),
-        new TableCell({ children: [new Paragraph("Название")] }),
+        new TableCell({ children: [new Paragraph("Код")] }),
+        new TableCell({ children: [new Paragraph("Домен")] }),
         new TableCell({ children: [new Paragraph("n")] }),
         new TableCell({ children: [new Paragraph("Среднее")] }),
       ],
     }),
-    ...profile.scaleResults.map(
+    ...profile.domains.map(
       (row) =>
         new TableRow({
           children: [
             new TableCell({ children: [new Paragraph(row.code)] }),
             new TableCell({ children: [new Paragraph(row.name)] }),
             new TableCell({ children: [new Paragraph(String(row.n))] }),
-            new TableCell({ children: [new Paragraph(formatMean(row.mean))] }),
+            new TableCell({ children: [new Paragraph(fm(row.mean))] }),
           ],
         }),
     ),
   ];
-
   children.push(
-    new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: tableRows,
-    }),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: domainRows }),
   );
+  children.push(new Paragraph({ text: "" }));
+  children.push(new Paragraph({ text: "Субдомены", heading: HeadingLevel.HEADING_2 }));
+
+  const subRows = [
+    new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph("Домен")] }),
+        new TableCell({ children: [new Paragraph("Субдомен")] }),
+        new TableCell({ children: [new Paragraph("n")] }),
+        new TableCell({ children: [new Paragraph("Среднее")] }),
+      ],
+    }),
+    ...profile.subdomains.map(
+      (row) =>
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph(row.domainCode)] }),
+            new TableCell({ children: [new Paragraph(row.name)] }),
+            new TableCell({ children: [new Paragraph(String(row.n))] }),
+            new TableCell({ children: [new Paragraph(fm(row.mean))] }),
+          ],
+        }),
+    ),
+  ];
+  children.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: subRows }));
+  children.push(new Paragraph({ text: "" }));
+  children.push(new Paragraph({ text: "Нюансы", heading: HeadingLevel.HEADING_2 }));
+
+  const nuRows = [
+    new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph("Домен")] }),
+        new TableCell({ children: [new Paragraph("Нюанс")] }),
+        new TableCell({ children: [new Paragraph("n")] }),
+        new TableCell({ children: [new Paragraph("Среднее")] }),
+      ],
+    }),
+    ...profile.nuances.map(
+      (row) =>
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph(row.domainCode)] }),
+            new TableCell({ children: [new Paragraph(row.name)] }),
+            new TableCell({ children: [new Paragraph(String(row.n))] }),
+            new TableCell({ children: [new Paragraph(fm(row.mean))] }),
+          ],
+        }),
+    ),
+  ];
+  children.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: nuRows }));
   children.push(new Paragraph({ text: "" }));
   children.push(
     new Paragraph({
-      text: "Ответы по пунктам (1–90)",
+      text: "Ответы по пунктам (1–121)",
       heading: HeadingLevel.HEADING_2,
     }),
   );
 
-  for (let id = 1; id <= N; id += 1) {
+  for (let id = 1; id <= FFICD_N; id += 1) {
     const blocks = buildItemParagraphsForDocx(
       { id, score: scores[id - 1] },
       Paragraph,
@@ -307,7 +362,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
   const doc = new Document({ sections: [{ children }] });
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, `SCL90-R_${new Date().toISOString().slice(0, 10)}.docx`);
+  saveAs(blob, `FFiCD_${new Date().toISOString().slice(0, 10)}.docx`);
 });
 
 renderForm();
