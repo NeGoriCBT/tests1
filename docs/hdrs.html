@@ -13,11 +13,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
     <title>Шкала Гамильтона (HDRS)</title>
-    <script type="module" crossorigin src="./assets/hdrs-BLwJbWf3.js"></script>
+    <script type="module" crossorigin src="./assets/hdrs-C3iAkxYL.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/global-CjZ2v8s6.js">
-    <link rel="modulepreload" crossorigin href="./assets/specialist-modal-Bwv6498z.js">
+    <link rel="modulepreload" crossorigin href="./assets/scroll-nav-3MmgfKiH.js">
     <link rel="stylesheet" crossorigin href="./assets/global-DWZSg-ZL.css">
-    <link rel="stylesheet" crossorigin href="./assets/specialist-modal-DShnoFH6.css">
+    <link rel="stylesheet" crossorigin href="./assets/scroll-nav-BJgC8DTX.css">
     <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
     <link rel="stylesheet" crossorigin href="./assets/hdrs-B8T5AqVa.css">
   </head>
@@ -43,20 +43,8 @@
       </div>
     </noscript>
     <div class="layout layout--wide">
-      <nav class="breadcrumb specialist-row" aria-label="Навигация">
+      <nav class="breadcrumb" aria-label="Навигация">
         <a href="./index.html">← Все тесты</a>
-        <div class="specialist-row__actions">
-          <button
-            type="button"
-            class="btn btn--ghost"
-            id="btn-specialist"
-            aria-haspopup="dialog"
-            aria-controls="specialist-modal"
-          >
-            Специалист
-          </button>
-          <span class="specialist-current" id="specialist-current">Не выбран</span>
-        </div>
       </nav>
       <header class="header">
         <h1>Шкала Гамильтона для оценки депрессии (HDRS)</h1>
@@ -81,6 +69,19 @@
         </p>
       </section>
 
+      <div class="specialist-bar" id="specialist-bar">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          id="btn-specialist"
+          aria-haspopup="dialog"
+          aria-controls="specialist-modal"
+        >
+          Специалист
+        </button>
+        <span class="specialist-current" id="specialist-current">Не выбран</span>
+      </div>
+
       <form id="hdrs-form" class="bdi-form"></form>
 
       <section class="results results--bai" id="results" hidden>
@@ -104,6 +105,17 @@
         Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
       </footer>
     </div>
+
+    <button
+      type="button"
+      class="scroll-flip"
+      id="btn-scroll-flip"
+      data-label-down="Вниз"
+      data-label-up="Вверх"
+      aria-label="Прокрутить вниз"
+    >
+      ↓ Вниз
+    </button>
 
     <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
       <div class="specialist-modal__backdrop" aria-hidden="true"></div>

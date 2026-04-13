@@ -9,6 +9,8 @@ import {
 import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
+import { scrollToQuestionThenAlert } from "./validation-helpers.js";
+import { initScrollNavButton } from "./scroll-nav.js";
 
 const N = 90;
 
@@ -134,7 +136,11 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
   const { scores, missing } = collectScores();
   if (missing.length > 0) {
-    alert(`Отметьте ответ по каждому пункту 1–90. Не заполнено: ${missing.slice(0, 15).join(", ")}${missing.length > 15 ? "…" : ""}`);
+    scrollToQuestionThenAlert(
+      missing[0],
+      "scl90",
+      `Отметьте ответ по каждому пункту 1–90. Не заполнено: ${missing.slice(0, 15).join(", ")}${missing.length > 15 ? "…" : ""}`,
+    );
     return;
   }
 
@@ -173,7 +179,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
   }
   const specialistName = getSelectedSpecialistName();
   if (!specialistName) {
-    alert("Выберите специалиста кнопкой «Специалист» вверху страницы.");
+    alert("Выберите специалиста кнопкой «Специалист» (блок под инструкцией).");
     return;
   }
 
@@ -306,3 +312,4 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
 renderForm();
 initSpecialistModal();
+initScrollNavButton();

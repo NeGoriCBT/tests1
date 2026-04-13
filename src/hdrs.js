@@ -3,6 +3,8 @@ import { HDRS_ITEMS, interpretHdrs } from "./hdrs-data.js";
 import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
+import { scrollToQuestionThenAlert } from "./validation-helpers.js";
+import { initScrollNavButton } from "./scroll-nav.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   const item = HDRS_ITEMS.find((i) => i.id === row.id);
@@ -136,7 +138,11 @@ form.addEventListener("submit", (e) => {
   const { perItem, missing } = collectAnswers();
 
   if (missing.length > 0) {
-    alert(`Отметьте ответ по каждому номеру 1–17. Не заполнено: ${missing.join(", ")}`);
+    scrollToQuestionThenAlert(
+      missing[0],
+      "hdrs",
+      `Отметьте ответ по каждому номеру 1–17. Не заполнено: ${missing.join(", ")}`,
+    );
     return;
   }
 
@@ -158,7 +164,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
   }
   const specialistName = getSelectedSpecialistName();
   if (!specialistName) {
-    alert("Выберите специалиста кнопкой «Специалист» вверху страницы.");
+    alert("Выберите специалиста кнопкой «Специалист» (блок под инструкцией).");
     return;
   }
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, HighlightColor } = await import("docx");
@@ -232,3 +238,4 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
 renderForm();
 initSpecialistModal();
+initScrollNavButton();

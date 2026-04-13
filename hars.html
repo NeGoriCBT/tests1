@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="./src/styles/bdi.css" />
     <link rel="stylesheet" href="./src/styles/hdrs.css" />
     <link rel="stylesheet" href="./src/styles/specialist-modal.css" />
+    <link rel="stylesheet" href="./src/styles/scroll-nav.css" />
   </head>
   <body>
     <script>
@@ -40,20 +41,8 @@
       </div>
     </noscript>
     <div class="layout layout--wide">
-      <nav class="breadcrumb specialist-row" aria-label="Навигация">
+      <nav class="breadcrumb" aria-label="Навигация">
         <a href="./index.html">← Все тесты</a>
-        <div class="specialist-row__actions">
-          <button
-            type="button"
-            class="btn btn--ghost"
-            id="btn-specialist"
-            aria-haspopup="dialog"
-            aria-controls="specialist-modal"
-          >
-            Специалист
-          </button>
-          <span class="specialist-current" id="specialist-current">Не выбран</span>
-        </div>
       </nav>
       <header class="header">
         <h1>Шкала Гамильтона для оценки тревоги (HARS)</h1>
@@ -78,6 +67,19 @@
         </p>
       </section>
 
+      <div class="specialist-bar" id="specialist-bar">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          id="btn-specialist"
+          aria-haspopup="dialog"
+          aria-controls="specialist-modal"
+        >
+          Специалист
+        </button>
+        <span class="specialist-current" id="specialist-current">Не выбран</span>
+      </div>
+
       <form id="hars-form" class="bdi-form"></form>
 
       <section class="results results--bai" id="results" hidden>
@@ -101,6 +103,17 @@
         Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
       </footer>
     </div>
+
+    <button
+      type="button"
+      class="scroll-flip"
+      id="btn-scroll-flip"
+      data-label-down="Вниз"
+      data-label-up="Вверх"
+      aria-label="Прокрутить вниз"
+    >
+      ↓ Вниз
+    </button>
 
     <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
       <div class="specialist-modal__backdrop" aria-hidden="true"></div>
