@@ -2,6 +2,14 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function () {
+        var HAMILTON_SCALES_BLOCKED = true;
+        if (HAMILTON_SCALES_BLOCKED) {
+          location.replace(new URL("./index.html", location.href));
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
     <title>Шкала Гамильтона — тревога (HARS)</title>

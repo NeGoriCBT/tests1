@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <title>SCL-90-R — опросник симптоматики</title>
+    <script type="module" crossorigin src="./assets/scl90-BbSAYtDr.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/global-CjZ2v8s6.js">
+    <link rel="modulepreload" crossorigin href="./assets/specialist-modal-Bwv6498z.js">
+    <link rel="stylesheet" crossorigin href="./assets/global-DWZSg-ZL.css">
+    <link rel="stylesheet" crossorigin href="./assets/specialist-modal-DShnoFH6.css">
+    <link rel="stylesheet" crossorigin href="./assets/scl90-DnVUjChC.css">
+    <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
+  </head>
+  <body>
+    <script>
+      (function () {
+        function redirectIfSourceOnly() {
+          if (!location.hostname.endsWith("github.io")) return;
+          if (location.pathname.includes("/docs/")) return;
+          if (document.head.querySelector('script[src*="assets/"]')) return;
+          location.replace(new URL("docs/scl90.html", location.href).href);
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
+        } else {
+          redirectIfSourceOnly();
+        }
+      })();
+    </script>
+    <noscript>
+      <div class="noscript-banner">
+        Для работы опросника включите JavaScript в настройках браузера.
+      </div>
+    </noscript>
+    <div class="layout layout--wide">
+      <nav class="breadcrumb specialist-row" aria-label="Навигация">
+        <a href="./index.html">← Все тесты</a>
+        <div class="specialist-row__actions">
+          <button
+            type="button"
+            class="btn btn--ghost"
+            id="btn-specialist"
+            aria-haspopup="dialog"
+            aria-controls="specialist-modal"
+          >
+            Специалист
+          </button>
+          <span class="specialist-current" id="specialist-current">Не выбран</span>
+        </div>
+      </nav>
+      <header class="header">
+        <h1>Опросник выраженности психопатологической симптоматики</h1>
+        <p class="lead">Symptom Checklist-90-Revised (SCL-90-R)</p>
+        <p class="disclaimer">
+          <strong>Важно.</strong> Методика не ставит диагноз и не заменяет очную консультацию специалиста. Результаты носят
+          информационный и скрининговый характер.
+        </p>
+        <p class="privacy-note">
+          <strong>Конфиденциальность.</strong> Ответы никуда не отправляются и не сохраняются на сервере: расчёт выполняется
+          только в вашем браузере. Файл Word создаётся у вас на устройстве.
+        </p>
+      </header>
+
+      <section class="instruction">
+        <h2>Инструкция</h2>
+        <p>
+          Ниже приведён перечень проблем и жалоб, иногда возникающих у людей. Пожалуйста, читайте каждый пункт внимательно.
+          Отметьте <strong>один</strong> ответ в каждом пункте — тот, который наиболее точно описывает степень вашего
+          дискомфорта или встревоженности в связи с этой проблемой в течение <strong>последней недели</strong>, включая
+          сегодняшний день. Не пропускайте ни одного пункта.
+        </p>
+        <div class="scl90-legend">
+          <p class="scl90-legend__prompt">Насколько сильно Вас тревожили симптомы:</p>
+          <p>
+            <strong>0</strong> — совсем нет · <strong>1</strong> — немного · <strong>2</strong> — умеренно ·
+            <strong>3</strong> — сильно · <strong>4</strong> — очень сильно
+          </p>
+        </div>
+        <p class="disclaimer" style="margin-top: 1rem">
+          <strong>Источник адаптации:</strong> Н.В. Тарабрина и др., Институт психологии РАН, 2001; см. также: Тарабрина Н.В.
+          Практикум по психологии посттравматического стресса. — СПб.: Питер, 2001.
+        </p>
+      </section>
+
+      <form id="scl90-form" class="bdi-form scl90-form"></form>
+
+      <section class="results results--bai" id="results" hidden>
+        <h2>Результат</h2>
+        <div class="scl90-meta-grid">
+          <div class="result-card">
+            <span class="result-card__label">Сумма баллов (0–360)</span>
+            <span class="result-card__value" id="score-raw">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">GSI (общий индекс)</span>
+            <span class="result-card__value" id="score-gsi">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">PSI (пунктов с оценкой 1–4)</span>
+            <span class="result-card__value" id="score-psi">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">PDSI</span>
+            <span class="result-card__value" id="score-pdsi">—</span>
+          </div>
+        </div>
+        <h3 class="results__subheading">Средние значения по шкалам</h3>
+        <div style="overflow-x: auto">
+          <table class="scl90-results-table" aria-describedby="scl90-table-caption">
+            <caption id="scl90-table-caption" class="visually-hidden">
+              Средние баллы по девяти основным шкалам и дополнительным пунктам
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Шкала</th>
+                <th scope="col">Название</th>
+                <th scope="col">Пунктов (n)</th>
+                <th scope="col">Среднее</th>
+              </tr>
+            </thead>
+            <tbody id="scl90-scale-tbody"></tbody>
+          </table>
+        </div>
+        <p class="result-card__hint" style="margin-top: 1rem">
+          Интерпретация средних и индексов — по ключу методики и клиническому контексту; ориентиры для популяции приведены в
+          руководствах по SCL-90-R.
+        </p>
+        <div class="results__actions">
+          <button type="button" class="btn btn--primary" id="btn-download">Скачать отчёт (Word)</button>
+        </div>
+      </section>
+
+      <footer class="footer footer--disclaimer">
+        Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
+      </footer>
+    </div>
+
+    <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
+      <div class="specialist-modal__backdrop" aria-hidden="true"></div>
+      <div
+        class="specialist-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="specialist-modal-title"
+      >
+        <h2 id="specialist-modal-title" class="specialist-modal__title">Специалист</h2>
+        <p class="specialist-modal__lead">Выберите специалиста — он будет указан в начале отчёта Word.</p>
+        <div id="specialist-modal-list" class="specialist-modal__list"></div>
+        <button type="button" class="btn btn--primary specialist-modal__close" id="specialist-modal-close">
+          Готово
+        </button>
+      </div>
+    </div>
+
+  </body>
+</html>

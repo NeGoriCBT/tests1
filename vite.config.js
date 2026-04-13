@@ -11,6 +11,7 @@ export default defineConfig({
         bai: "bai.html",
         hdrs: "hdrs.html",
         hars: "hars.html",
+        scl90: "scl90.html",
       },
     },
   },
