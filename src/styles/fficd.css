@@ -81,6 +81,17 @@
     line-height: 1.2;
   }
 
+  .fficd-form .scl90-item {
+    grid-template-columns: 2.25rem minmax(18rem, 1fr) repeat(5, minmax(6.4rem, 1fr));
+    gap: 0.35rem 0.5rem;
+    align-items: start;
+  }
+
+  .fficd-form .scl90-item__opts {
+    grid-column: 3 / -1;
+    display: contents;
+  }
+
   .fficd-form .scl90-item .scl90-opt {
     justify-content: center;
     padding: 0.35rem 0.25rem;
