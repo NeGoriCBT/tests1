@@ -143,11 +143,11 @@ function renderForm() {
   head.innerHTML = `
     <span>№</span>
     <span>Утверждение</span>
-    <span>1</span>
-    <span>2</span>
-    <span>3</span>
-    <span>4</span>
-    <span>5</span>
+    <span>Абсолютно<br/>не согласен</span>
+    <span>Не согласен</span>
+    <span>Затрудняюсь<br/>ответить</span>
+    <span>Согласен</span>
+    <span>Абсолютно<br/>согласен</span>
   `;
   form.appendChild(head);
 

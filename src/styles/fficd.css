@@ -65,6 +65,35 @@
 @media (min-width: 901px) {
   .fficd-form .scl90-matrix-head {
     display: grid;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--surface);
+    grid-template-columns: 2.25rem minmax(18rem, 1fr) repeat(5, minmax(6.4rem, 1fr));
+    gap: 0.35rem 0.5rem;
+    align-items: center;
+    padding: 0.55rem 0.25rem 0.45rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .fficd-form .scl90-matrix-head span {
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
+
+  .fficd-form .scl90-item .scl90-opt {
+    justify-content: center;
+    padding: 0.35rem 0.25rem;
+  }
+
+  .fficd-form .scl90-item .scl90-opt span {
+    display: none;
+  }
+
+  .fficd-form .scl90-item .scl90-opt input {
+    margin: 0;
+    width: 1.05rem;
+    height: 1.05rem;
   }
 }
 
