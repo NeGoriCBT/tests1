@@ -10,7 +10,21 @@ import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
-import { initScrollNavButton } from "./scroll-nav.js";
+
+const MOBILE_QUERY = "(max-width: 900px)";
+
+function isMobileLayout() {
+  return window.matchMedia(MOBILE_QUERY).matches;
+}
+
+function formatDurationMs(ms) {
+  if (ms == null || Number.isNaN(ms) || ms < 0) return "—";
+  const totalSec = Math.round(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  if (m === 0) return `${sec} с`;
+  return `${m} мин ${String(sec).padStart(2, "0")} с`;
+}
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   const text = FFICD_ITEM_TEXTS[row.id - 1];
@@ -53,6 +67,81 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
 
 const form = document.getElementById("fficd-form");
 const resultsEl = document.getElementById("results");
+const introEl = document.getElementById("fficd-intro");
+const specialistStepEl = document.getElementById("fficd-step-specialist");
+const testShellEl = document.getElementById("fficd-test-shell");
+const railEl = document.getElementById("fficd-rail");
+const mobileStripEl = document.getElementById("fficd-mobile-strip");
+
+let testStartTimeMs = null;
+let mobileIndex = 1;
+
+/** @type {HTMLButtonElement[]} */
+let railButtons = [];
+/** @type {HTMLButtonElement[]} */
+let stripButtons = [];
+
+function itemAnswered(i) {
+  const sel = form.querySelector(`input[name="fficd-${i}"]:checked`);
+  return Boolean(sel);
+}
+
+function updateProgressUI() {
+  for (let i = 1; i <= FFICD_N; i += 1) {
+    const ok = itemAnswered(i);
+    const rb = railButtons[i - 1];
+    const sb = stripButtons[i - 1];
+    if (rb) {
+      rb.classList.toggle("fficd-nav-num--answered", ok);
+      rb.classList.toggle("fficd-nav-num--empty", !ok);
+    }
+    if (sb) {
+      sb.classList.toggle("fficd-nav-num--answered", ok);
+      sb.classList.toggle("fficd-nav-num--empty", !ok);
+      sb.classList.toggle("fficd-nav-num--current", isMobileLayout() && i === mobileIndex);
+    }
+  }
+}
+
+function setMobileActiveIndex(n) {
+  mobileIndex = Math.max(1, Math.min(FFICD_N, n));
+  const items = form.querySelectorAll(".scl90-item");
+  items.forEach((fs, idx) => {
+    fs.classList.toggle("fficd-item--active", idx + 1 === mobileIndex);
+  });
+  updateProgressUI();
+  updateMobileNavButtons();
+  const curBtn = stripButtons[mobileIndex - 1];
+  if (curBtn && isMobileLayout()) {
+    curBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }
+}
+
+function updateMobileNavButtons() {
+  const prev = document.getElementById("fficd-btn-prev");
+  const next = document.getElementById("fficd-btn-next");
+  if (!prev || !next) return;
+  if (!isMobileLayout()) {
+    prev.disabled = false;
+    next.disabled = false;
+    return;
+  }
+  prev.disabled = mobileIndex <= 1;
+  next.disabled = mobileIndex >= FFICD_N;
+}
+
+function syncMobileMode() {
+  if (!form) return;
+  if (isMobileLayout()) {
+    form.classList.add("fficd-mode-mobile");
+    setMobileActiveIndex(mobileIndex);
+  } else {
+    form.classList.remove("fficd-mode-mobile");
+    form.querySelectorAll(".scl90-item").forEach((el) => el.classList.remove("fficd-item--active"));
+    updateProgressUI();
+    updateMobileNavButtons();
+  }
+}
 
 function renderForm() {
   const head = document.createElement("div");
@@ -68,9 +157,52 @@ function renderForm() {
   `;
   form.appendChild(head);
 
+  railButtons = [];
+  stripButtons = [];
+  railEl.replaceChildren();
+  mobileStripEl.replaceChildren();
+
+  const railTitle = document.createElement("p");
+  railTitle.className = "fficd-rail__title";
+  railTitle.textContent = "Пункты";
+  const railGrid = document.createElement("div");
+  railGrid.className = "fficd-rail__grid";
+  railEl.appendChild(railTitle);
+  railEl.appendChild(railGrid);
+
+  for (let i = 1; i <= FFICD_N; i += 1) {
+    const rb = document.createElement("button");
+    rb.type = "button";
+    rb.className = "fficd-nav-num fficd-nav-num--empty";
+    rb.textContent = String(i);
+    rb.setAttribute("aria-label", `Перейти к вопросу ${i}`);
+    rb.dataset.n = String(i);
+    rb.addEventListener("click", () => {
+      if (isMobileLayout()) return;
+      const fs = document.getElementById(`fficd-fieldset-${i}`);
+      if (fs) fs.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    railGrid.appendChild(rb);
+    railButtons.push(rb);
+
+    const sb = document.createElement("button");
+    sb.type = "button";
+    sb.className = "fficd-nav-num fficd-nav-num--empty";
+    sb.textContent = String(i);
+    sb.setAttribute("aria-label", `Вопрос ${i}`);
+    sb.dataset.n = String(i);
+    sb.addEventListener("click", () => {
+      if (!isMobileLayout()) return;
+      setMobileActiveIndex(i);
+    });
+    mobileStripEl.appendChild(sb);
+    stripButtons.push(sb);
+  }
+
   for (let i = 1; i <= FFICD_N; i += 1) {
     const fieldset = document.createElement("fieldset");
     fieldset.className = "scl90-item";
+    fieldset.id = `fficd-fieldset-${i}`;
 
     const num = document.createElement("div");
     num.className = "scl90-item__number";
@@ -94,7 +226,6 @@ function renderForm() {
       input.name = `fficd-${i}`;
       input.value = String(opt.score);
       input.id = id;
-      input.required = true;
       const span = document.createElement("span");
       span.innerHTML = `<span class="scl90-opt__n">${opt.score}</span> <span class="scl90-opt__t">${opt.text}</span>`;
       label.appendChild(input);
@@ -108,11 +239,15 @@ function renderForm() {
     form.appendChild(fieldset);
   }
 
-  const actions = document.createElement("div");
-  actions.className = "form-actions";
-  actions.innerHTML =
+  form.addEventListener("change", () => {
+    updateProgressUI();
+  });
+
+  const actionsDesktop = document.createElement("div");
+  actionsDesktop.className = "form-actions fficd-form-actions--desktop";
+  actionsDesktop.innerHTML =
     '<button type="submit" class="btn btn--primary">Подсчитать результат</button>';
-  form.appendChild(actions);
+  form.appendChild(actionsDesktop);
 }
 
 function collectScores() {
@@ -134,6 +269,9 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
   const { scores, missing } = collectScores();
   if (missing.length > 0) {
+    if (isMobileLayout()) {
+      setMobileActiveIndex(missing[0]);
+    }
     scrollToQuestionThenAlert(
       missing[0],
       "fficd",
@@ -142,6 +280,7 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
+  const elapsedMs = testStartTimeMs != null ? Date.now() - testStartTimeMs : null;
   const profile = computeFficdProfile(scores);
 
   document.getElementById("fficd-sum").textContent = String(profile.totalSum);
@@ -186,8 +325,11 @@ form.addEventListener("submit", (e) => {
     nuTbody.appendChild(tr);
   });
 
+  introEl.hidden = true;
+  specialistStepEl.hidden = true;
+  testShellEl.hidden = true;
   resultsEl.hidden = false;
-  resultsEl.dataset.payload = JSON.stringify({ scores, profile });
+  resultsEl.dataset.payload = JSON.stringify({ scores, profile, elapsedMs });
   resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
@@ -216,7 +358,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     HighlightColor,
   } = await import("docx");
 
-  const { scores, profile } = JSON.parse(raw);
+  const { scores, profile, elapsedMs } = JSON.parse(raw);
   const dateStr = new Date().toLocaleString("ru-RU");
   const fm = formatFficdMean;
 
@@ -248,6 +390,13 @@ document.getElementById("btn-download").addEventListener("click", async () => {
           text: "Конфиденциальность: ответы не передавались на сервер; отчёт сформирован локально в браузере.",
           italics: true,
         }),
+      ],
+    }),
+    new Paragraph({ text: "" }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: "Время прохождения теста: ", bold: true }),
+        new TextRun(formatDurationMs(elapsedMs)),
       ],
     }),
     new Paragraph({ text: "" }),
@@ -365,6 +514,46 @@ document.getElementById("btn-download").addEventListener("click", async () => {
   saveAs(blob, `FFiCD_${new Date().toISOString().slice(0, 10)}.docx`);
 });
 
+document.getElementById("btn-fficd-start").addEventListener("click", () => {
+  testStartTimeMs = Date.now();
+  introEl.hidden = true;
+  specialistStepEl.hidden = false;
+  specialistStepEl.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+document.getElementById("btn-fficd-to-questions").addEventListener("click", () => {
+  if (!getSelectedSpecialistName()) {
+    alert("Выберите специалиста кнопкой «Специалист».");
+    return;
+  }
+  specialistStepEl.hidden = true;
+  testShellEl.hidden = false;
+  mobileIndex = 1;
+  syncMobileMode();
+  testShellEl.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+document.getElementById("fficd-btn-prev").addEventListener("click", () => {
+  if (!isMobileLayout()) return;
+  setMobileActiveIndex(mobileIndex - 1);
+});
+
+document.getElementById("fficd-btn-next").addEventListener("click", () => {
+  if (!isMobileLayout()) return;
+  setMobileActiveIndex(mobileIndex + 1);
+});
+
+const mq = window.matchMedia(MOBILE_QUERY);
+function onLayoutChange() {
+  if (testShellEl.hidden) return;
+  syncMobileMode();
+}
+if (typeof mq.addEventListener === "function") {
+  mq.addEventListener("change", onLayoutChange);
+} else if (typeof mq.addListener === "function") {
+  mq.addListener(onLayoutChange);
+}
+
 renderForm();
 initSpecialistModal();
-initScrollNavButton();
+updateProgressUI();

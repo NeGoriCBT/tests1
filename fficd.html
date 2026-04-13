@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="./src/styles/global.css" />
     <link rel="stylesheet" href="./src/styles/bdi.css" />
     <link rel="stylesheet" href="./src/styles/scl90.css" />
+    <link rel="stylesheet" href="./src/styles/fficd.css" />
     <link rel="stylesheet" href="./src/styles/specialist-modal.css" />
-    <link rel="stylesheet" href="./src/styles/scroll-nav.css" />
   </head>
   <body>
     <script>
@@ -36,20 +36,21 @@
       <nav class="breadcrumb" aria-label="Навигация">
         <a href="./index.html">← Все тесты</a>
       </nav>
-      <header class="header">
-        <h1>Пятифакторный личностный опросник для МКБ-11</h1>
-        <p class="lead">The Five-Factor Personality Inventory for ICD-11 (FFiCD)</p>
-        <p class="disclaimer">
-          <strong>Важно.</strong> Методика предназначена для оценки выраженности дезадаптивных личностных черт и не ставит
-          диагноз сама по себе. Интерпретация — в клиническом контексте специалиста.
-        </p>
-        <p class="privacy-note">
-          <strong>Конфиденциальность.</strong> Ответы не отправляются на сервер и не сохраняются в облаке; расчёт выполняется
-          в вашем браузере.
-        </p>
-      </header>
 
-      <section class="instruction">
+      <section id="fficd-intro" class="instruction">
+        <header class="header" style="margin-bottom: 1rem">
+          <h1>Пятифакторный личностный опросник для МКБ-11</h1>
+          <p class="lead">The Five-Factor Personality Inventory for ICD-11 (FFiCD)</p>
+          <p class="disclaimer">
+            <strong>Важно.</strong> Методика предназначена для оценки выраженности дезадаптивных личностных черт и не ставит
+            диагноз сама по себе. Интерпретация — в клиническом контексте специалиста.
+          </p>
+          <p class="privacy-note">
+            <strong>Конфиденциальность.</strong> Ответы не отправляются на сервер и не сохраняются в облаке; расчёт
+            выполняется в вашем браузере.
+          </p>
+        </header>
+
         <h2>Инструкция</h2>
         <p>
           Ниже приведены утверждения о вашем самочувствии или поведении. Отвечайте на каждый вопрос по шкале от
@@ -69,25 +70,58 @@
           <strong>Источник:</strong> Oltmanns J.R., Widiger T.A. The Five-Factor Personality Inventory for ICD-11 //
           Psychol Assess. 2020. Samylkin D. et al. FFiCD (Russian version), figshare, 2023.
         </p>
+
+        <div class="fficd-intro-actions">
+          <button type="button" class="btn btn--primary" id="btn-fficd-start">Начать тест</button>
+        </div>
       </section>
 
-      <div class="specialist-bar" id="specialist-bar">
-        <p class="specialist-bar__title">ВЫБЕРИТЕ СПЕЦИАЛИСТА</p>
-        <div class="specialist-bar__row">
-          <button
-            type="button"
-            class="btn btn--ghost"
-            id="btn-specialist"
-            aria-haspopup="dialog"
-            aria-controls="specialist-modal"
-          >
-            Специалист
+      <section id="fficd-step-specialist" class="fficd-step-specialist" hidden>
+        <p class="fficd-step-specialist__hint">
+          Выберите специалиста — он будет указан в отчёте Word. Затем перейдите к вопросам опросника.
+        </p>
+        <div class="specialist-bar" id="specialist-bar">
+          <p class="specialist-bar__title">ВЫБЕРИТЕ СПЕЦИАЛИСТА</p>
+          <div class="specialist-bar__row">
+            <button
+              type="button"
+              class="btn btn--ghost"
+              id="btn-specialist"
+              aria-haspopup="dialog"
+              aria-controls="specialist-modal"
+            >
+              Специалист
+            </button>
+            <span class="specialist-current" id="specialist-current">Не выбран</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn--primary" id="btn-fficd-to-questions">
+          Перейти к вопросам
+        </button>
+      </section>
+
+      <div id="fficd-test-shell" class="fficd-test-shell" hidden>
+        <div class="fficd-mobile-strip-wrap" id="fficd-mobile-strip-wrap">
+          <div class="fficd-mobile-strip" id="fficd-mobile-strip" role="tablist" aria-label="Номера вопросов"></div>
+        </div>
+
+        <div class="fficd-form-row">
+          <form id="fficd-form" class="bdi-form scl90-form fficd-form"></form>
+          <aside class="fficd-rail" id="fficd-rail" aria-label="Номера вопросов"></aside>
+        </div>
+
+        <div class="fficd-mobile-nav" id="fficd-mobile-nav">
+          <button type="button" class="btn btn--ghost" id="fficd-btn-prev">Предыдущий вопрос</button>
+          <span class="fficd-mobile-nav__spacer" aria-hidden="true"></span>
+          <button type="button" class="btn btn--ghost" id="fficd-btn-next">Следующий вопрос</button>
+        </div>
+
+        <div class="form-actions fficd-form-actions--mobile">
+          <button type="submit" form="fficd-form" class="btn btn--primary" id="fficd-submit-mobile">
+            Подсчитать результат
           </button>
-          <span class="specialist-current" id="specialist-current">Не выбран</span>
         </div>
       </div>
-
-      <form id="fficd-form" class="bdi-form scl90-form"></form>
 
       <section class="results results--bai" id="results" hidden>
         <h2>Результат</h2>
@@ -149,17 +183,6 @@
         Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
       </footer>
     </div>
-
-    <button
-      type="button"
-      class="scroll-flip"
-      id="btn-scroll-flip"
-      data-label-down="Вниз"
-      data-label-up="Вверх"
-      aria-label="Прокрутить вниз"
-    >
-      ↓ Вниз
-    </button>
 
     <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
       <div class="specialist-modal__backdrop" aria-hidden="true"></div>
