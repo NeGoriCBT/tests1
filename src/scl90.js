@@ -10,7 +10,7 @@ import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
-import { initScrollNavButton } from "./scroll-nav.js";
+import { initQuestionNavRail } from "./question-nav-rail.js";
 
 const N = 90;
 
@@ -115,6 +115,14 @@ function renderForm() {
   actions.innerHTML =
     '<button type="submit" class="btn btn--primary">Подсчитать результат</button>';
   form.appendChild(actions);
+
+  initQuestionNavRail({
+    railEl: document.getElementById("scl90-rail"),
+    form,
+    count: N,
+    headingId: (i) => `scl90-h-${i}`,
+    isAnswered: (i) => Boolean(form.querySelector(`input[name="scl90-${i}"]:checked`)),
+  });
 }
 
 function collectScores() {
@@ -312,4 +320,3 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
 renderForm();
 initSpecialistModal();
-initScrollNavButton();

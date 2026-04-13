@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
     <title>Шкала депрессии Бека (BDI)</title>
-    <script type="module" crossorigin src="./assets/bdi-FUyDxvlx.js"></script>
+    <script type="module" crossorigin src="./assets/bdi-CtraZqzK.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/global-CjZ2v8s6.js">
-    <link rel="modulepreload" crossorigin href="./assets/validation-helpers-B6CWh2en.js">
-    <link rel="modulepreload" crossorigin href="./assets/scroll-nav-BKbWC_Rj.js">
+    <link rel="modulepreload" crossorigin href="./assets/question-nav-rail-rtMXRoQ6.js">
     <link rel="stylesheet" crossorigin href="./assets/global-DWZSg-ZL.css">
-    <link rel="stylesheet" crossorigin href="./assets/validation-helpers-4jMUboik.css">
-    <link rel="stylesheet" crossorigin href="./assets/scroll-nav-GXQ5tko9.css">
+    <link rel="stylesheet" crossorigin href="./assets/question-nav-rail-CQlY56-6.css">
     <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
   </head>
   <body>
@@ -79,7 +77,10 @@
         </div>
       </div>
 
-      <form id="bdi-form" class="bdi-form"></form>
+      <div class="test-form-row">
+        <form id="bdi-form" class="bdi-form"></form>
+        <aside class="question-rail" id="bdi-rail" aria-label="Номера вопросов"></aside>
+      </div>
 
       <section class="results" id="results" hidden>
         <h2>Результат</h2>
@@ -107,17 +108,6 @@
         Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
       </footer>
     </div>
-
-    <button
-      type="button"
-      class="scroll-flip"
-      id="btn-scroll-flip"
-      data-label-down="Вниз"
-      data-label-up="Вверх"
-      aria-label="Прокрутить вниз"
-    >
-      ↓ Вниз
-    </button>
 
     <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
       <div class="specialist-modal__backdrop" aria-hidden="true"></div>

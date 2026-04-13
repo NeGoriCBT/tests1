@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="./src/styles/bdi.css" />
     <link rel="stylesheet" href="./src/styles/scl90.css" />
     <link rel="stylesheet" href="./src/styles/specialist-modal.css" />
-    <link rel="stylesheet" href="./src/styles/scroll-nav.css" />
+    <link rel="stylesheet" href="./src/styles/question-nav-rail.css" />
   </head>
   <body>
     <script>
@@ -86,7 +86,10 @@
         </div>
       </div>
 
-      <form id="scl90-form" class="bdi-form scl90-form"></form>
+      <div class="test-form-row">
+        <form id="scl90-form" class="bdi-form scl90-form"></form>
+        <aside class="question-rail" id="scl90-rail" aria-label="Номера вопросов"></aside>
+      </div>
 
       <section class="results results--bai" id="results" hidden>
         <h2>Результат</h2>
@@ -138,17 +141,6 @@
         Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
       </footer>
     </div>
-
-    <button
-      type="button"
-      class="scroll-flip"
-      id="btn-scroll-flip"
-      data-label-down="Вниз"
-      data-label-up="Вверх"
-      aria-label="Прокрутить вниз"
-    >
-      ↓ Вниз
-    </button>
 
     <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
       <div class="specialist-modal__backdrop" aria-hidden="true"></div>

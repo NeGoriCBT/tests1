@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
     <title>SCL-90-R — опросник симптоматики</title>
-    <script type="module" crossorigin src="./assets/scl90-B_SvTfxw.js"></script>
+    <script type="module" crossorigin src="./assets/scl90-Bs1v9vcu.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/global-CjZ2v8s6.js">
-    <link rel="modulepreload" crossorigin href="./assets/validation-helpers-B6CWh2en.js">
-    <link rel="modulepreload" crossorigin href="./assets/scroll-nav-BKbWC_Rj.js">
+    <link rel="modulepreload" crossorigin href="./assets/question-nav-rail-rtMXRoQ6.js">
     <link rel="stylesheet" crossorigin href="./assets/global-DWZSg-ZL.css">
-    <link rel="stylesheet" crossorigin href="./assets/validation-helpers-4jMUboik.css">
-    <link rel="stylesheet" crossorigin href="./assets/scroll-nav-GXQ5tko9.css">
+    <link rel="stylesheet" crossorigin href="./assets/question-nav-rail-CQlY56-6.css">
     <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
     <link rel="stylesheet" crossorigin href="./assets/scl90-DnVUjChC.css">
   </head>
@@ -90,7 +88,10 @@
         </div>
       </div>
 
-      <form id="scl90-form" class="bdi-form scl90-form"></form>
+      <div class="test-form-row">
+        <form id="scl90-form" class="bdi-form scl90-form"></form>
+        <aside class="question-rail" id="scl90-rail" aria-label="Номера вопросов"></aside>
+      </div>
 
       <section class="results results--bai" id="results" hidden>
         <h2>Результат</h2>
@@ -142,17 +143,6 @@
         Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
       </footer>
     </div>
-
-    <button
-      type="button"
-      class="scroll-flip"
-      id="btn-scroll-flip"
-      data-label-down="Вниз"
-      data-label-up="Вверх"
-      aria-label="Прокрутить вниз"
-    >
-      ↓ Вниз
-    </button>
 
     <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
       <div class="specialist-modal__backdrop" aria-hidden="true"></div>

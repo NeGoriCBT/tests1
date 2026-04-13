@@ -4,7 +4,7 @@ import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
-import { initScrollNavButton } from "./scroll-nav.js";
+import { initQuestionNavRail } from "./question-nav-rail.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   const item = HDRS_ITEMS.find((i) => i.id === row.id);
@@ -110,6 +110,14 @@ function renderForm() {
   actions.className = "form-actions";
   actions.innerHTML = '<button type="submit" class="btn btn--primary">Подсчитать результат</button>';
   form.appendChild(actions);
+
+  initQuestionNavRail({
+    railEl: document.getElementById("hdrs-rail"),
+    form,
+    count: HDRS_ITEMS.length,
+    headingId: (i) => `hdrs-heading-${i}`,
+    isAnswered: (i) => Boolean(form.querySelector(`input[name="hdrs-${i}"]:checked`)),
+  });
 }
 
 function collectAnswers() {
@@ -238,4 +246,3 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
 renderForm();
 initSpecialistModal();
-initScrollNavButton();

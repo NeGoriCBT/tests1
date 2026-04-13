@@ -1,4 +1,4 @@
-/* FFiCD: интро → специалист → тест; ПК — полная матрица + рельс номеров; мобильный — по одному вопросу */
+/* FFiCD: интро → специалист → тест; мобильный — по одному вопросу. Рельс — см. question-nav-rail.css */
 
 .fficd-intro-actions {
   margin: 1.5rem 0 0;
@@ -22,96 +22,6 @@
   margin-top: 0.5rem;
 }
 
-.fficd-form-row {
-  display: block;
-}
-
-@media (min-width: 901px) {
-  .fficd-form-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    max-width: 100%;
-  }
-
-  .fficd-form-row .scl90-form {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-/* Рельс номеров — только десктоп */
-.fficd-rail {
-  display: none;
-}
-
-@media (min-width: 901px) {
-  .fficd-rail {
-    display: block;
-    flex-shrink: 0;
-    width: 7.5rem;
-    max-height: min(85vh, 52rem);
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: sticky;
-    top: 0.75rem;
-    padding: 0.5rem 0.35rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 0.75rem;
-  }
-
-  .fficd-rail__title {
-    margin: 0 0 0.35rem;
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--muted);
-    text-align: center;
-  }
-
-  .fficd-rail__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.25rem;
-  }
-}
-
-.fficd-nav-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 1.65rem;
-  padding: 0.15rem 0.2rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg, #f4f4f5);
-  color: var(--muted);
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.fficd-nav-num:hover {
-  border-color: var(--accent);
-  color: var(--text);
-}
-
-.fficd-nav-num--answered {
-  background: #dcfce7;
-  border-color: #86efac;
-  color: #14532d;
-}
-
-.fficd-nav-num--current {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
 /* Мобильная полоса номеров */
 .fficd-mobile-strip-wrap {
   display: none;
@@ -122,24 +32,6 @@
   .fficd-mobile-strip-wrap {
     display: block;
   }
-}
-
-.fficd-mobile-strip {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.35rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0.35rem 0.15rem 0.5rem;
-  margin: 0 -0.25rem;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-}
-
-.fficd-mobile-strip .fficd-nav-num {
-  flex: 0 0 auto;
-  min-width: 2.25rem;
-  min-height: 2.25rem;
 }
 
 /* FFiCD: матрица заголовка только с 901px (перекрываем scl90 720px) */

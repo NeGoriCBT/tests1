@@ -3,7 +3,7 @@ import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
-import { initScrollNavButton } from "./scroll-nav.js";
+import { initQuestionNavRail } from "./question-nav-rail.js";
 import { BAI_ITEMS, BAI_SCALE, interpretBai } from "./bai-data.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
@@ -235,5 +235,11 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 });
 
 renderForm();
+initQuestionNavRail({
+  railEl: document.getElementById("bai-rail"),
+  form,
+  count: BAI_ITEMS.length,
+  headingId: (i) => `bai-heading-${i}`,
+  isAnswered: (i) => Boolean(form.querySelector(`input[name="bai-${i}"]:checked`)),
+});
 initSpecialistModal();
-initScrollNavButton();

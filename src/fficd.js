@@ -10,6 +10,7 @@ import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
+import { initQuestionNavRail } from "./question-nav-rail.js";
 
 const MOBILE_QUERY = "(max-width: 900px)";
 
@@ -77,8 +78,6 @@ let testStartTimeMs = null;
 let mobileIndex = 1;
 
 /** @type {HTMLButtonElement[]} */
-let railButtons = [];
-/** @type {HTMLButtonElement[]} */
 let stripButtons = [];
 
 function itemAnswered(i) {
@@ -89,16 +88,11 @@ function itemAnswered(i) {
 function updateProgressUI() {
   for (let i = 1; i <= FFICD_N; i += 1) {
     const ok = itemAnswered(i);
-    const rb = railButtons[i - 1];
     const sb = stripButtons[i - 1];
-    if (rb) {
-      rb.classList.toggle("fficd-nav-num--answered", ok);
-      rb.classList.toggle("fficd-nav-num--empty", !ok);
-    }
     if (sb) {
-      sb.classList.toggle("fficd-nav-num--answered", ok);
-      sb.classList.toggle("fficd-nav-num--empty", !ok);
-      sb.classList.toggle("fficd-nav-num--current", isMobileLayout() && i === mobileIndex);
+      sb.classList.toggle("question-rail__btn--answered", ok);
+      sb.classList.toggle("question-rail__btn--empty", !ok);
+      sb.classList.toggle("question-rail__btn--current", isMobileLayout() && i === mobileIndex);
     }
   }
 }
@@ -157,37 +151,13 @@ function renderForm() {
   `;
   form.appendChild(head);
 
-  railButtons = [];
   stripButtons = [];
-  railEl.replaceChildren();
   mobileStripEl.replaceChildren();
 
-  const railTitle = document.createElement("p");
-  railTitle.className = "fficd-rail__title";
-  railTitle.textContent = "Пункты";
-  const railGrid = document.createElement("div");
-  railGrid.className = "fficd-rail__grid";
-  railEl.appendChild(railTitle);
-  railEl.appendChild(railGrid);
-
   for (let i = 1; i <= FFICD_N; i += 1) {
-    const rb = document.createElement("button");
-    rb.type = "button";
-    rb.className = "fficd-nav-num fficd-nav-num--empty";
-    rb.textContent = String(i);
-    rb.setAttribute("aria-label", `Перейти к вопросу ${i}`);
-    rb.dataset.n = String(i);
-    rb.addEventListener("click", () => {
-      if (isMobileLayout()) return;
-      const fs = document.getElementById(`fficd-fieldset-${i}`);
-      if (fs) fs.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    railGrid.appendChild(rb);
-    railButtons.push(rb);
-
     const sb = document.createElement("button");
     sb.type = "button";
-    sb.className = "fficd-nav-num fficd-nav-num--empty";
+    sb.className = "question-rail__btn question-rail__btn--empty";
     sb.textContent = String(i);
     sb.setAttribute("aria-label", `Вопрос ${i}`);
     sb.dataset.n = String(i);
@@ -239,7 +209,18 @@ function renderForm() {
     form.appendChild(fieldset);
   }
 
+  initQuestionNavRail({
+    railEl,
+    form,
+    count: FFICD_N,
+    headingId: (i) => `fficd-h-${i}`,
+    isAnswered: itemAnswered,
+  });
+
   form.addEventListener("change", () => {
+    updateProgressUI();
+  });
+  form.addEventListener("input", () => {
     updateProgressUI();
   });
 

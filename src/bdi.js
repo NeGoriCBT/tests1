@@ -4,7 +4,7 @@ import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
-import { initScrollNavButton } from "./scroll-nav.js";
+import { initQuestionNavRail } from "./question-nav-rail.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   const item = BDI_ITEMS.find((i) => i.id === row.id);
@@ -314,5 +314,11 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 });
 
 renderForm();
+initQuestionNavRail({
+  railEl: document.getElementById("bdi-rail"),
+  form,
+  count: BDI_ITEMS.length,
+  headingId: (i) => `bdi-heading-${i}`,
+  isAnswered: (i) => Boolean(form.querySelector(`input[name="item-${i}"]:checked`)),
+});
 initSpecialistModal();
-initScrollNavButton();
