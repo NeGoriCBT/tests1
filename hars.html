@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="./src/styles/global.css" />
     <link rel="stylesheet" href="./src/styles/bdi.css" />
     <link rel="stylesheet" href="./src/styles/hdrs.css" />
+    <link rel="stylesheet" href="./src/styles/test-flow.css" />
     <link rel="stylesheet" href="./src/styles/specialist-modal.css" />
     <link rel="stylesheet" href="./src/styles/question-nav-rail.css" />
   </head>
@@ -44,48 +45,60 @@
       <nav class="breadcrumb" aria-label="Навигация">
         <a href="./index.html">← Все тесты</a>
       </nav>
-      <header class="header">
-        <h1>Шкала Гамильтона для оценки тревоги (HARS)</h1>
-        <p class="lead">Hamilton Anxiety Rating Scale, 14 пунктов</p>
-        <p class="disclaimer">
-          <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
-          информационный характер и не заменяют очную консультацию врача или психолога.
-        </p>
-        <p class="privacy-note">
-          <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
-          расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
-          закрытия страницы введённые ответы в браузере не хранятся.
-        </p>
-      </header>
+      <section id="test-intro" class="instruction">
+        <header class="header" style="margin-bottom: 1rem">
+          <h1>Шкала Гамильтона для оценки тревоги (HARS)</h1>
+          <p class="lead">Hamilton Anxiety Rating Scale, 14 пунктов</p>
+          <p class="disclaimer">
+            <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
+            информационный характер и не заменяют очную консультацию врача или психолога.
+          </p>
+          <p class="privacy-note">
+            <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
+            расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
+            закрытия страницы введённые ответы в браузере не хранятся.
+          </p>
+        </header>
 
-      <section class="instruction">
         <h2>Инструкция</h2>
         <p>
           Оригинальная шкала предназначена для оценки специалистом. В данной форме каждый пункт можно использовать для
           <strong>самооценки по описанию</strong>: внимательно прочитайте формулировки и отметьте <strong>один</strong>
           вариант в каждом номере, который лучше соответствует вашему состоянию за последние дни (в том числе сегодня).
         </p>
+
+        <div class="test-intro-actions">
+          <button type="button" class="btn btn--primary" id="btn-test-start">Начать тест</button>
+        </div>
       </section>
 
-      <div class="specialist-bar" id="specialist-bar">
-        <p class="specialist-bar__title">ВЫБЕРИТЕ СПЕЦИАЛИСТА</p>
-        <div class="specialist-bar__row">
-          <button
-            type="button"
-            class="btn btn--ghost"
-            id="btn-specialist"
-            aria-haspopup="dialog"
-            aria-controls="specialist-modal"
-          >
-            Специалист
-          </button>
-          <span class="specialist-current" id="specialist-current">Не выбран</span>
+      <section id="test-step-specialist" class="test-step-specialist" hidden>
+        <p class="test-step-specialist__hint">
+          Выберите специалиста — он будет указан в отчёте Word. Затем перейдите к вопросам опросника.
+        </p>
+        <div class="specialist-bar" id="specialist-bar">
+          <p class="specialist-bar__title">ВЫБЕРИТЕ СПЕЦИАЛИСТА</p>
+          <div class="specialist-bar__row">
+            <button
+              type="button"
+              class="btn btn--ghost"
+              id="btn-specialist"
+              aria-haspopup="dialog"
+              aria-controls="specialist-modal"
+            >
+              Специалист
+            </button>
+            <span class="specialist-current" id="specialist-current">Не выбран</span>
+          </div>
         </div>
-      </div>
+        <button type="button" class="btn btn--primary" id="btn-test-to-questions">Перейти к вопросам</button>
+      </section>
 
-      <div class="test-form-row">
-        <form id="hars-form" class="bdi-form"></form>
-        <aside class="question-rail" id="hars-rail" aria-label="Номера вопросов"></aside>
+      <div id="test-shell" class="test-shell" hidden>
+        <div class="test-form-row">
+          <form id="hars-form" class="bdi-form"></form>
+          <aside class="question-rail" id="hars-rail" aria-label="Номера вопросов"></aside>
+        </div>
       </div>
 
       <section class="results results--bai" id="results" hidden>

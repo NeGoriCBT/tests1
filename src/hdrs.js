@@ -1,6 +1,7 @@
 import { saveAs } from "file-saver";
 import { HDRS_ITEMS, interpretHdrs } from "./hdrs-data.js";
 import { getSelectedSpecialistName } from "./specialists.js";
+import { formatDurationMs } from "./test-duration.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
@@ -60,6 +61,10 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
 
 const form = document.getElementById("hdrs-form");
 const resultsEl = document.getElementById("results");
+const introEl = document.getElementById("test-intro");
+const specialistStepEl = document.getElementById("test-step-specialist");
+const testShellEl = document.getElementById("test-shell");
+let testStartTimeMs = null;
 
 function renderForm() {
   HDRS_ITEMS.forEach((item) => {
@@ -159,8 +164,13 @@ form.addEventListener("submit", (e) => {
   document.getElementById("score-total").textContent = String(total);
   document.getElementById("interpret-total").textContent = interpretHdrs(total);
 
+  const elapsedMs = testStartTimeMs != null ? Date.now() - testStartTimeMs : null;
+  if (introEl) introEl.hidden = true;
+  if (specialistStepEl) specialistStepEl.hidden = true;
+  if (testShellEl) testShellEl.hidden = true;
+
   resultsEl.hidden = false;
-  resultsEl.dataset.payload = JSON.stringify({ perItem, total });
+  resultsEl.dataset.payload = JSON.stringify({ perItem, total, elapsedMs });
   resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
@@ -176,7 +186,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     return;
   }
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, HighlightColor } = await import("docx");
-  const { perItem, total } = JSON.parse(raw);
+  const { perItem, total, elapsedMs } = JSON.parse(raw);
   const dateStr = new Date().toLocaleString("ru-RU");
 
   const children = [
@@ -199,6 +209,13 @@ document.getElementById("btn-download").addEventListener("click", async () => {
           text: "Конфиденциальность: ответы не передавались на сервер и не сохранялись в облаке; отчёт сформирован локально в браузере на устройстве пользователя.",
           italics: true,
         }),
+      ],
+    }),
+    new Paragraph({ text: "" }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: "Время прохождения теста: ", bold: true }),
+        new TextRun(formatDurationMs(elapsedMs)),
       ],
     }),
     new Paragraph({ text: "" }),
@@ -246,3 +263,19 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
 renderForm();
 initSpecialistModal();
+
+document.getElementById("btn-test-start")?.addEventListener("click", () => {
+  testStartTimeMs = Date.now();
+  if (introEl) introEl.hidden = true;
+  if (specialistStepEl) specialistStepEl.hidden = false;
+  specialistStepEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+document.getElementById("btn-test-to-questions")?.addEventListener("click", () => {
+  if (!getSelectedSpecialistName()) {
+    alert("Выберите специалиста кнопкой «Специалист».");
+    return;
+  }
+  if (specialistStepEl) specialistStepEl.hidden = true;
+  if (testShellEl) testShellEl.hidden = false;
+  testShellEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+});

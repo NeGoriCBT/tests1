@@ -13,6 +13,7 @@ export default defineConfig({
         hars: "hars.html",
         scl90: "scl90.html",
         fficd: "fficd.html",
+        sifs: "sifs.html",
       },
     },
   },

@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
     <title>Шкала тревоги Бека (BAI)</title>
-    <script type="module" crossorigin src="./assets/bai-DkxJvFRo.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/global-CjZ2v8s6.js">
-    <link rel="modulepreload" crossorigin href="./assets/question-nav-rail-rtMXRoQ6.js">
-    <link rel="stylesheet" crossorigin href="./assets/global-DWZSg-ZL.css">
-    <link rel="stylesheet" crossorigin href="./assets/question-nav-rail-CQlY56-6.css">
+    <script type="module" crossorigin src="./assets/bai-Br3jWKZ1.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/global-B_Jj1ot9.js">
+    <link rel="modulepreload" crossorigin href="./assets/question-nav-rail-mY0i1DtM.js">
+    <link rel="stylesheet" crossorigin href="./assets/global-FsqcezuS.css">
+    <link rel="stylesheet" crossorigin href="./assets/question-nav-rail-BI5U5kmD.css">
     <link rel="stylesheet" crossorigin href="./assets/bai-BpBwi9Zb.css">
+    <link rel="stylesheet" crossorigin href="./assets/test-flow-6gYf9N0d.css">
   </head>
   <body>
     <script>
@@ -37,21 +38,21 @@
       <nav class="breadcrumb" aria-label="Навигация">
         <a href="./index.html">← Все тесты</a>
       </nav>
-      <header class="header">
-        <h1>Шкала тревоги Бека (BAI)</h1>
-        <p class="lead">Beck Anxiety Inventory</p>
-        <p class="disclaimer">
-          <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
-          информационный характер и не заменяют очную консультацию врача или психолога.
-        </p>
-        <p class="privacy-note">
-          <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
-          расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
-          закрытия страницы введённые ответы в браузере не хранятся.
-        </p>
-      </header>
+      <section id="test-intro" class="instruction">
+        <header class="header" style="margin-bottom: 1rem">
+          <h1>Шкала тревоги Бека (BAI)</h1>
+          <p class="lead">Beck Anxiety Inventory</p>
+          <p class="disclaimer">
+            <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
+            информационный характер и не заменяют очную консультацию врача или психолога.
+          </p>
+          <p class="privacy-note">
+            <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
+            расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
+            закрытия страницы введённые ответы в браузере не хранятся.
+          </p>
+        </header>
 
-      <section class="instruction">
         <h2>Инструкция</h2>
         <p>
           Данный список содержит наиболее распространённые симптомы тревоги. Пожалуйста, тщательно изучите каждый
@@ -70,27 +71,39 @@
             </li>
           </ul>
         </div>
+
+        <div class="test-intro-actions">
+          <button type="button" class="btn btn--primary" id="btn-test-start">Начать тест</button>
+        </div>
       </section>
 
-      <div class="specialist-bar" id="specialist-bar">
-        <p class="specialist-bar__title">ВЫБЕРИТЕ СПЕЦИАЛИСТА</p>
-        <div class="specialist-bar__row">
-          <button
-            type="button"
-            class="btn btn--ghost"
-            id="btn-specialist"
-            aria-haspopup="dialog"
-            aria-controls="specialist-modal"
-          >
-            Специалист
-          </button>
-          <span class="specialist-current" id="specialist-current">Не выбран</span>
+      <section id="test-step-specialist" class="test-step-specialist" hidden>
+        <p class="test-step-specialist__hint">
+          Выберите специалиста — он будет указан в отчёте Word. Затем перейдите к вопросам опросника.
+        </p>
+        <div class="specialist-bar" id="specialist-bar">
+          <p class="specialist-bar__title">ВЫБЕРИТЕ СПЕЦИАЛИСТА</p>
+          <div class="specialist-bar__row">
+            <button
+              type="button"
+              class="btn btn--ghost"
+              id="btn-specialist"
+              aria-haspopup="dialog"
+              aria-controls="specialist-modal"
+            >
+              Специалист
+            </button>
+            <span class="specialist-current" id="specialist-current">Не выбран</span>
+          </div>
         </div>
-      </div>
+        <button type="button" class="btn btn--primary" id="btn-test-to-questions">Перейти к вопросам</button>
+      </section>
 
-      <div class="test-form-row">
-        <form id="bai-form" class="bdi-form"></form>
-        <aside class="question-rail" id="bai-rail" aria-label="Номера вопросов"></aside>
+      <div id="test-shell" class="test-shell" hidden>
+        <div class="test-form-row">
+          <form id="bai-form" class="bdi-form"></form>
+          <aside class="question-rail" id="bai-rail" aria-label="Номера вопросов"></aside>
+        </div>
       </div>
 
       <section class="results results--bai" id="results" hidden>

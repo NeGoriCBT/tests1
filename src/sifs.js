@@ -5,16 +5,30 @@ import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
 import { initQuestionNavRail } from "./question-nav-rail.js";
-import { BAI_ITEMS, BAI_SCALE, interpretBai } from "./bai-data.js";
+import {
+  SIFS_ITEMS,
+  SIFS_SCALE,
+  SIFS_SUBSCALE_LABELS,
+  adjustedScore,
+  computeSifsScores,
+  formatCoeff,
+  interpretSifsSeverity,
+} from "./sifs-data.js";
 
 function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
-  const item = BAI_ITEMS.find((i) => i.id === row.id);
+  const item = SIFS_ITEMS.find((i) => i.id === row.id);
   if (!item) return [];
+
+  const raw = row.score;
+  const adj = adjustedScore(raw, item.reverse);
 
   const out = [];
   out.push(
     new Paragraph({
-      children: [new TextRun({ text: String(row.id), bold: true })],
+      children: [
+        new TextRun({ text: String(row.id), bold: true }),
+        new TextRun({ text: item.reverse ? " (обратный пункт)" : "", italics: true }),
+      ],
     }),
   );
   out.push(
@@ -23,10 +37,8 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
     }),
   );
 
-  const selected = row.score;
-
-  BAI_SCALE.forEach((opt) => {
-    const isSelected = selected === opt.score;
+  SIFS_SCALE.forEach((opt) => {
+    const isSelected = raw === opt.score;
     const line = `${opt.score} — ${opt.text}`;
     out.push(
       new Paragraph({
@@ -43,8 +55,10 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   out.push(
     new Paragraph({
       children: [
-        new TextRun({ text: "Балл: ", italics: true }),
-        new TextRun(String(selected ?? "—")),
+        new TextRun({ text: "Сырой балл: ", italics: true }),
+        new TextRun(String(raw ?? "—")),
+        new TextRun({ text: ". Балл с учётом обращения: ", italics: true }),
+        new TextRun(String(adj ?? "—")),
       ],
     }),
   );
@@ -52,7 +66,7 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
   return out;
 }
 
-const form = document.getElementById("bai-form");
+const form = document.getElementById("sifs-form");
 const resultsEl = document.getElementById("results");
 const introEl = document.getElementById("test-intro");
 const specialistStepEl = document.getElementById("test-step-specialist");
@@ -70,33 +84,36 @@ function renderForm() {
   const thead = document.createElement("thead");
   const hr = document.createElement("tr");
   const hSym = document.createElement("th");
-  hSym.textContent = "Симптом";
+  hSym.textContent = "Утверждение";
   hr.appendChild(hSym);
-  BAI_SCALE.forEach((col) => {
+  SIFS_SCALE.forEach((col) => {
     const th = document.createElement("th");
-    th.textContent = col.text;
+    th.className = "sifs-th-score";
+    th.textContent = String(col.score);
+    th.title = col.text;
     hr.appendChild(th);
   });
   thead.appendChild(hr);
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
-  BAI_ITEMS.forEach((item) => {
+  SIFS_ITEMS.forEach((item) => {
     const tr = document.createElement("tr");
     const th = document.createElement("th");
     th.scope = "row";
-    th.id = `bai-heading-${item.id}`;
-    th.innerHTML = `<span class="bai-num">${item.id}.</span> ${item.text}`;
+    th.id = `sifs-heading-${item.id}`;
+    const rev = item.reverse ? ' <span class="sifs-rev" title="Обратный пункт">(R)</span>' : "";
+    th.innerHTML = `<span class="bai-num">${item.id}.</span>${rev} ${item.text}`;
     tr.appendChild(th);
 
-    BAI_SCALE.forEach((col) => {
+    SIFS_SCALE.forEach((col) => {
       const td = document.createElement("td");
-      const id = `bai-${item.id}-${col.score}`;
+      const id = `sifs-${item.id}-${col.score}`;
       const lab = document.createElement("label");
       lab.setAttribute("for", id);
       const inp = document.createElement("input");
       inp.type = "radio";
-      inp.name = `bai-${item.id}`;
+      inp.name = `sifs-${item.id}`;
       inp.value = String(col.score);
       inp.id = id;
       inp.required = true;
@@ -120,8 +137,8 @@ function collectAnswers() {
   const perItem = [];
   const missing = [];
 
-  BAI_ITEMS.forEach((item) => {
-    const sel = form.querySelector(`input[name="bai-${item.id}"]:checked`);
+  SIFS_ITEMS.forEach((item) => {
+    const sel = form.querySelector(`input[name="sifs-${item.id}"]:checked`);
     if (!sel) {
       missing.push(item.id);
       perItem.push({ id: item.id, score: null, text: item.text });
@@ -141,16 +158,22 @@ form.addEventListener("submit", (e) => {
   if (missing.length > 0) {
     scrollToQuestionThenAlert(
       missing[0],
-      "bai",
-      `Отметьте ответ по каждому номеру 1–21. Не заполнено: ${missing.join(", ")}`,
+      "sifs",
+      `Отметьте ответ по каждому номеру 1–24. Не заполнено: ${missing.join(", ")}`,
     );
     return;
   }
 
-  const total = perItem.reduce((a, r) => a + r.score, 0);
+  const { means, totalScore, severityCoeff } = computeSifsScores(perItem);
 
-  document.getElementById("score-total").textContent = String(total);
-  document.getElementById("interpret-total").textContent = interpretBai(total);
+  document.getElementById("score-total").textContent = formatCoeff(totalScore);
+  document.getElementById("score-severity").textContent = formatCoeff(severityCoeff);
+  document.getElementById("interpret-total").textContent = interpretSifsSeverity(severityCoeff);
+
+  document.getElementById("mean-self-awareness").textContent = formatCoeff(means.selfAwareness);
+  document.getElementById("mean-self-direction").textContent = formatCoeff(means.selfDirection);
+  document.getElementById("mean-empathy").textContent = formatCoeff(means.empathy);
+  document.getElementById("mean-trust").textContent = formatCoeff(means.trust);
 
   const elapsedMs = testStartTimeMs != null ? Date.now() - testStartTimeMs : null;
   if (introEl) introEl.hidden = true;
@@ -158,7 +181,13 @@ form.addEventListener("submit", (e) => {
   if (testShellEl) testShellEl.hidden = true;
 
   resultsEl.hidden = false;
-  resultsEl.dataset.payload = JSON.stringify({ perItem, total, elapsedMs });
+  resultsEl.dataset.payload = JSON.stringify({
+    perItem,
+    means,
+    totalScore,
+    severityCoeff,
+    elapsedMs,
+  });
   resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
@@ -174,19 +203,19 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     return;
   }
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, HighlightColor } = await import("docx");
-  const { perItem, total, elapsedMs } = JSON.parse(raw);
+  const { perItem, means, totalScore, severityCoeff, elapsedMs } = JSON.parse(raw);
   const dateStr = new Date().toLocaleString("ru-RU");
 
   const children = [
     ...buildWordReportHeader(Paragraph, TextRun, { dateStr, specialistName }),
     new Paragraph({
-      text: "Шкала тревоги Бека (BAI)",
+      text: "SIFS — шкала личностного и межличностного функционирования",
       heading: HeadingLevel.HEADING_1,
     }),
     new Paragraph({
       children: [
         new TextRun({
-          text: "Важно: опросник не ставит диагноз и не является основанием для самолечения. Результаты носят информационный характер и не заменяют очную консультацию врача или психолога.",
+          text: "The Self and Interpersonal Functioning Scale. Ориентировочная оценка тяжести расстройства личности не заменяет клиническую диагностику.",
           italics: true,
         }),
       ],
@@ -213,30 +242,62 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: "Суммарный балл (0–63): ", bold: true }),
-        new TextRun(String(total)),
+        new TextRun({ text: "Общий балл (сумма средних по четырём подшкалам): ", bold: true }),
+        new TextRun(formatCoeff(totalScore)),
       ],
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: "Интерпретация: ", bold: true }),
-        new TextRun(interpretBai(total)),
+        new TextRun({ text: "Коэффициент тяжести (Общий балл / 4): ", bold: true }),
+        new TextRun(formatCoeff(severityCoeff)),
+      ],
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: "Интерпретация (ориентировочно): ", bold: true }),
+        new TextRun(interpretSifsSeverity(severityCoeff)),
       ],
     }),
     new Paragraph({ text: "" }),
     new Paragraph({
-      text: "Шкала интерпретации",
+      text: "Средние значения по подшкалам (после обращения обратных пунктов)",
       heading: HeadingLevel.HEADING_2,
     }),
-    new Paragraph(
-      "Подсчёт производится простым суммированием баллов по всей шкале (1–21).",
-    ),
-    new Paragraph("До 21 балла включительно — незначительный уровень тревоги."),
-    new Paragraph("От 22 до 35 баллов — средняя выраженность тревоги."),
-    new Paragraph("36 баллов и выше (при максимуме 63 балла) — очень высокая тревога."),
+    new Paragraph({
+      children: [
+        new TextRun({ text: `${SIFS_SUBSCALE_LABELS.selfAwareness}: `, bold: true }),
+        new TextRun(formatCoeff(means.selfAwareness)),
+      ],
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: `${SIFS_SUBSCALE_LABELS.selfDirection}: `, bold: true }),
+        new TextRun(formatCoeff(means.selfDirection)),
+      ],
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: `${SIFS_SUBSCALE_LABELS.empathy}: `, bold: true }),
+        new TextRun(formatCoeff(means.empathy)),
+      ],
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: `${SIFS_SUBSCALE_LABELS.trust}: `, bold: true }),
+        new TextRun(formatCoeff(means.trust)),
+      ],
+    }),
     new Paragraph({ text: "" }),
     new Paragraph({
-      text: "Ответы (1–21)",
+      text: "Ориентировочная интерпретация коэффициента тяжести",
+      heading: HeadingLevel.HEADING_2,
+    }),
+    new Paragraph("1,30–1,89 — лёгкая степень расстройства личности (условно)."),
+    new Paragraph("1,90–2,49 — умеренная степень (условно)."),
+    new Paragraph("Более 2,5 — тяжёлая степень (условно)."),
+    new Paragraph({ text: "" }),
+    new Paragraph({
+      text: "Ответы (1–24)",
       heading: HeadingLevel.HEADING_2,
     }),
   ];
@@ -248,16 +309,16 @@ document.getElementById("btn-download").addEventListener("click", async () => {
 
   const doc = new Document({ sections: [{ children }] });
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, `BAI_${new Date().toISOString().slice(0, 10)}.docx`);
+  saveAs(blob, `SIFS_${new Date().toISOString().slice(0, 10)}.docx`);
 });
 
 renderForm();
 initQuestionNavRail({
-  railEl: document.getElementById("bai-rail"),
+  railEl: document.getElementById("sifs-rail"),
   form,
-  count: BAI_ITEMS.length,
-  headingId: (i) => `bai-heading-${i}`,
-  isAnswered: (i) => Boolean(form.querySelector(`input[name="bai-${i}"]:checked`)),
+  count: SIFS_ITEMS.length,
+  headingId: (i) => `sifs-heading-${i}`,
+  isAnswered: (i) => Boolean(form.querySelector(`input[name="sifs-${i}"]:checked`)),
 });
 initSpecialistModal();
 

@@ -1,6 +1,7 @@
 import { saveAs } from "file-saver";
 import { BDI_ITEMS, interpretTotal } from "./bdi-data.js";
 import { getSelectedSpecialistName } from "./specialists.js";
+import { formatDurationMs } from "./test-duration.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import { scrollToQuestionThenAlert } from "./validation-helpers.js";
@@ -74,6 +75,10 @@ function buildItemParagraphsForDocx(row, Paragraph, TextRun, HighlightColor) {
 
 const form = document.getElementById("bdi-form");
 const resultsEl = document.getElementById("results");
+const introEl = document.getElementById("test-intro");
+const specialistStepEl = document.getElementById("test-step-specialist");
+const testShellEl = document.getElementById("test-shell");
+let testStartTimeMs = null;
 
 function renderForm() {
   BDI_ITEMS.forEach((item) => {
@@ -215,8 +220,13 @@ form.addEventListener("submit", (e) => {
   document.getElementById("score-cog").textContent = String(cog);
   document.getElementById("score-som").textContent = String(som);
 
+  const elapsedMs = testStartTimeMs != null ? Date.now() - testStartTimeMs : null;
+  if (introEl) introEl.hidden = true;
+  if (specialistStepEl) specialistStepEl.hidden = true;
+  if (testShellEl) testShellEl.hidden = true;
+
   resultsEl.hidden = false;
-  resultsEl.dataset.payload = JSON.stringify({ perItem, total, cog, som });
+  resultsEl.dataset.payload = JSON.stringify({ perItem, total, cog, som, elapsedMs });
   resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
@@ -232,7 +242,7 @@ document.getElementById("btn-download").addEventListener("click", async () => {
     return;
   }
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, HighlightColor } = await import("docx");
-  const { perItem, total, cog, som } = JSON.parse(raw);
+  const { perItem, total, cog, som, elapsedMs } = JSON.parse(raw);
   const dateStr = new Date().toLocaleString("ru-RU");
 
   const children = [
@@ -255,6 +265,13 @@ document.getElementById("btn-download").addEventListener("click", async () => {
           text: "Конфиденциальность: ответы не передавались на сервер и не сохранялись в облаке; отчёт сформирован локально в браузере на устройстве пользователя.",
           italics: true,
         }),
+      ],
+    }),
+    new Paragraph({ text: "" }),
+    new Paragraph({
+      children: [
+        new TextRun({ text: "Время прохождения теста: ", bold: true }),
+        new TextRun(formatDurationMs(elapsedMs)),
       ],
     }),
     new Paragraph({ text: "" }),
@@ -322,3 +339,19 @@ initQuestionNavRail({
   isAnswered: (i) => Boolean(form.querySelector(`input[name="item-${i}"]:checked`)),
 });
 initSpecialistModal();
+
+document.getElementById("btn-test-start")?.addEventListener("click", () => {
+  testStartTimeMs = Date.now();
+  if (introEl) introEl.hidden = true;
+  if (specialistStepEl) specialistStepEl.hidden = false;
+  specialistStepEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+document.getElementById("btn-test-to-questions")?.addEventListener("click", () => {
+  if (!getSelectedSpecialistName()) {
+    alert("Выберите специалиста кнопкой «Специалист».");
+    return;
+  }
+  if (specialistStepEl) specialistStepEl.hidden = true;
+  if (testShellEl) testShellEl.hidden = false;
+  testShellEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+});

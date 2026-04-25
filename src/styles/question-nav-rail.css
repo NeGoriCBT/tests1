@@ -7,16 +7,18 @@
   display: block;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .test-form-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 5.85rem;
     align-items: flex-start;
-    gap: 1.25rem;
+    gap: 1rem;
     max-width: 100%;
+    width: 100%;
   }
 
   .test-form-row > form {
-    flex: 1;
+    width: 100%;
     min-width: 0;
   }
 }
@@ -25,12 +27,12 @@
   display: none;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .question-rail {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    width: 6.75rem;
+    width: 5.85rem;
     max-height: min(88vh, 56rem);
     padding: 0.65rem 0.5rem 0.75rem;
     position: sticky;
@@ -86,13 +88,14 @@
   justify-content: center;
   min-width: 0;
   min-height: 1.55rem;
-  padding: 0.2rem 0.1rem;
+  aspect-ratio: 1 / 1;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: #f1f5f9;
   color: var(--muted);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: clamp(0.55rem, 0.62vw, 0.72rem);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;

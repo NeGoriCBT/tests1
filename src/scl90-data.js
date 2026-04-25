@@ -120,6 +120,27 @@ export const SCL90_SCALES = [
   { code: "Dopoln.", name: "Дополнительные пункты", items: [19, 44, 59, 60, 64, 66, 89] },
 ];
 
+/** Нормативные средние значения РФ (M±m), по таблице пользователя. */
+export const SCL90_RU_NORM_SCALES = {
+  SOM: { mean: 0.44, err: 0.03 },
+  "O-C": { mean: 0.75, err: 0.04 },
+  INT: { mean: 0.66, err: 0.03 },
+  DEP: { mean: 0.62, err: 0.04 },
+  ANX: { mean: 0.47, err: 0.03 },
+  HOS: { mean: 0.6, err: 0.04 },
+  PHOB: { mean: 0.18, err: 0.02 },
+  PAR: { mean: 0.54, err: 0.04 },
+  PSY: { mean: 0.3, err: 0.03 },
+  "Dopoln.": { mean: 0.49, err: 0.03 },
+};
+
+/** Нормативные показатели РФ (M±m), по таблице пользователя. */
+export const SCL90_RU_NORM_INDICES = {
+  gsi: { mean: 0.51, err: 0.02 },
+  psi: { mean: 21.39, err: 2.02 },
+  pdsi: { mean: 1.17, err: 0.05 },
+};
+
 /**
  * @param {number[]} scores — 90 значений 0–4, индекс 0 = пункт 1
  */
@@ -134,13 +155,35 @@ export function computeScl90Profile(scores) {
   const scaleResults = SCL90_SCALES.map((sc) => {
     const sum = sc.items.reduce((s, itemNum) => s + scores[itemNum - 1], 0);
     const mean = sum / sc.items.length;
-    return { ...sc, sum, mean, n: sc.items.length };
+    const norm = SCL90_RU_NORM_SCALES[sc.code] ?? null;
+    const delta = norm ? mean - norm.mean : null;
+    return { ...sc, sum, mean, n: sc.items.length, norm, delta };
   });
 
-  return { totalSum, gsi, psi, pdsi, scaleResults };
+  const indexNorms = {
+    gsi: SCL90_RU_NORM_INDICES.gsi,
+    psi: SCL90_RU_NORM_INDICES.psi,
+    pdsi: SCL90_RU_NORM_INDICES.pdsi,
+  };
+
+  const indexDeltas = {
+    gsi: gsi - indexNorms.gsi.mean,
+    psi: psi - indexNorms.psi.mean,
+    pdsi: pdsi == null ? null : pdsi - indexNorms.pdsi.mean,
+  };
+
+  return { totalSum, gsi, psi, pdsi, scaleResults, indexNorms, indexDeltas };
 }
 
 export function formatMean(x) {
   if (x == null || Number.isNaN(x)) return "—";
   return x.toFixed(2).replace(".", ",");
+}
+
+export function formatDelta(x) {
+  if (x == null || Number.isNaN(x)) return "—";
+  const abs = Math.abs(x).toFixed(2).replace(".", ",");
+  if (x > 0) return `+${abs}`;
+  if (x < 0) return `−${abs}`;
+  return "0,00";
 }

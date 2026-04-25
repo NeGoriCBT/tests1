@@ -44,7 +44,7 @@ body {
 }
 
 .layout--wide {
-  max-width: 52rem;
+  max-width: min(96vw, 1500px);
 }
 
 .header h1 {

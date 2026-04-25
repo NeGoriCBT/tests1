@@ -4,14 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
-    <title>Шкала депрессии Бека (BDI)</title>
-    <script type="module" crossorigin src="./assets/bdi-DxO_7XSX.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/global-B_Jj1ot9.js">
-    <link rel="modulepreload" crossorigin href="./assets/question-nav-rail-mY0i1DtM.js">
-    <link rel="stylesheet" crossorigin href="./assets/global-FsqcezuS.css">
-    <link rel="stylesheet" crossorigin href="./assets/question-nav-rail-BI5U5kmD.css">
-    <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
-    <link rel="stylesheet" crossorigin href="./assets/test-flow-6gYf9N0d.css">
+    <title>SIFS — шкала личностного и межличностного функционирования</title>
+    <link rel="stylesheet" href="./src/styles/global.css" />
+    <link rel="stylesheet" href="./src/styles/bai.css" />
+    <link rel="stylesheet" href="./src/styles/sifs.css" />
+    <link rel="stylesheet" href="./src/styles/test-flow.css" />
+    <link rel="stylesheet" href="./src/styles/specialist-modal.css" />
+    <link rel="stylesheet" href="./src/styles/question-nav-rail.css" />
   </head>
   <body>
     <script>
@@ -20,7 +19,7 @@
           if (!location.hostname.endsWith("github.io")) return;
           if (location.pathname.includes("/docs/")) return;
           if (document.head.querySelector('script[src*="assets/"]')) return;
-          location.replace(new URL("docs/bdi.html", location.href).href);
+          location.replace(new URL("docs/sifs.html", location.href).href);
         }
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
@@ -40,8 +39,8 @@
       </nav>
       <section id="test-intro" class="instruction">
         <header class="header" style="margin-bottom: 1rem">
-          <h1>Шкала депрессии Бека (BDI)</h1>
-          <p class="lead">Beck Depression Inventory</p>
+          <h1>SIFS — шкала личностного и межличностного функционирования</h1>
+          <p class="lead">The Self and Interpersonal Functioning Scale · 24 утверждения</p>
           <p class="disclaimer">
             <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
             информационный характер и не заменяют очную консультацию врача или психолога.
@@ -55,10 +54,12 @@
 
         <h2>Инструкция</h2>
         <p>
-          В этом опроснике содержатся группы утверждений. Внимательно прочитайте каждую группу утверждений.
-          Затем определите в каждой группе одно утверждение, которое лучше всего соответствует тому, как Вы себя
-          чувствовали <strong>на этой неделе и сегодня</strong>. Отметьте выбранное утверждение. Если несколько
-          утверждений из одной группы кажутся Вам одинаково хорошо подходящими, отметьте каждое из них.
+          Эта анкета состоит из 24 утверждений о вас и о ваших взаимоотношениях с другими людьми. Оцените, насколько близко
+          каждое утверждение описывает вас, по шкале от 0 до 4. Отвечайте спонтанно; правильных или неправильных ответов
+          нет. Важно ответить на все вопросы и дать только один ответ на каждый.
+        </p>
+        <p class="privacy-note">
+          Пункты, помеченные <strong>(R)</strong>, — обратные: при подсчёте балл инвертируется (4 минус значение).
         </p>
 
         <div class="test-intro-actions">
@@ -90,26 +91,41 @@
 
       <div id="test-shell" class="test-shell" hidden>
         <div class="test-form-row">
-          <form id="bdi-form" class="bdi-form"></form>
-          <aside class="question-rail" id="bdi-rail" aria-label="Номера вопросов"></aside>
+          <form id="sifs-form" class="bdi-form"></form>
+          <aside class="question-rail" id="sifs-rail" aria-label="Номера вопросов"></aside>
         </div>
       </div>
 
-      <section class="results" id="results" hidden>
+      <section class="results results--bai" id="results" hidden>
         <h2>Результат</h2>
         <div class="results__grid">
           <div class="result-card">
-            <span class="result-card__label">Суммарный балл</span>
+            <span class="result-card__label">Общий балл (сумма средних по подшкалам)</span>
             <span class="result-card__value" id="score-total">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Коэффициент тяжести (Общий балл / 4)</span>
+            <span class="result-card__value" id="score-severity">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Интерпретация</span>
             <p class="result-card__hint" id="interpret-total"></p>
           </div>
           <div class="result-card">
-            <span class="result-card__label">Когнитивно-аффективная субшкала (1–13)</span>
-            <span class="result-card__value" id="score-cog">—</span>
+            <span class="result-card__label">Самосознание (среднее)</span>
+            <span class="result-card__value" id="mean-self-awareness">—</span>
           </div>
           <div class="result-card">
-            <span class="result-card__label">Соматическая субшкала (14–21)</span>
-            <span class="result-card__value" id="score-som">—</span>
+            <span class="result-card__label">Самонаправленность (среднее)</span>
+            <span class="result-card__value" id="mean-self-direction">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Эмпатия (среднее)</span>
+            <span class="result-card__value" id="mean-empathy">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Доверительные отношения (среднее)</span>
+            <span class="result-card__value" id="mean-trust">—</span>
           </div>
         </div>
         <div class="results__actions">
@@ -139,5 +155,6 @@
       </div>
     </div>
 
+    <script type="module" src="./src/sifs.js"></script>
   </body>
 </html>

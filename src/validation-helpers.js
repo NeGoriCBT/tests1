@@ -1,7 +1,7 @@
 /**
  * Прокрутка к первому пропущенному вопросу и попытка фокуса на поле ввода.
  * @param {number} itemId — номер пункта (как в опроснике)
- * @param {"bdi" | "bai" | "hdrs" | "hars" | "scl90" | "fficd"} testId
+ * @param {"bdi" | "bai" | "hdrs" | "hars" | "scl90" | "fficd" | "sifs"} testId
  */
 export function scrollToFirstMissingQuestion(itemId, testId) {
   const headingIds = {
@@ -11,6 +11,7 @@ export function scrollToFirstMissingQuestion(itemId, testId) {
     hars: `hars-heading-${itemId}`,
     scl90: `scl90-h-${itemId}`,
     fficd: `fficd-h-${itemId}`,
+    sifs: `sifs-heading-${itemId}`,
   };
   const hid = headingIds[testId];
   if (!hid) return;
