@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function () {
+        var HAMILTON_SCALES_BLOCKED = true;
+        if (HAMILTON_SCALES_BLOCKED) {
+          location.replace(new URL("./index.html", location.href));
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Шкала Гамильтона — тревога (HARS)</title>
+    <script type="module" crossorigin src="./assets/hars-OAWhS9RQ.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/global-B_Jj1ot9.js">
+    <link rel="modulepreload" crossorigin href="./assets/question-nav-rail-mY0i1DtM.js">
+    <link rel="stylesheet" crossorigin href="./assets/global-FsqcezuS.css">
+    <link rel="stylesheet" crossorigin href="./assets/question-nav-rail-BI5U5kmD.css">
+    <link rel="stylesheet" crossorigin href="./assets/bdi-sVNvQgS8.css">
+    <link rel="stylesheet" crossorigin href="./assets/hdrs-B8T5AqVa.css">
+    <link rel="stylesheet" crossorigin href="./assets/test-flow-6gYf9N0d.css">
+  </head>
+  <body>
+    <script>
+      (function () {
+        function redirectIfSourceOnly() {
+          if (!location.hostname.endsWith("github.io")) return;
+          if (location.pathname.includes("/docs/")) return;
+          if (document.head.querySelector('script[src*="assets/"]')) return;
+          location.replace(new URL("docs/hars.html", location.href).href);
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
+        } else {
+          redirectIfSourceOnly();
+        }
+      })();
+    </script>
+    <noscript>
+      <div class="noscript-banner">
+        Для работы опросника включите JavaScript в настройках браузера.
+      </div>
+    </noscript>
+    <div class="layout layout--wide">
+      <nav class="breadcrumb" aria-label="Навигация">
+        <a href="./index.html">← Все тесты</a>
+      </nav>
+      <section id="test-intro" class="instruction">
+        <header class="header" style="margin-bottom: 1rem">
+          <h1>Шкала Гамильтона для оценки тревоги (HARS)</h1>
+          <p class="lead">Hamilton Anxiety Rating Scale, 14 пунктов</p>
+          <p class="disclaimer">
+            <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
+            информационный характер и не заменяют очную консультацию врача или психолога.
+          </p>
+          <p class="privacy-note">
+            <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
+            расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
+            закрытия страницы введённые ответы в браузере не хранятся.
+          </p>
+        </header>
+
+        <h2>Инструкция</h2>
+        <p>
+          Оригинальная шкала предназначена для оценки специалистом. В данной форме каждый пункт можно использовать для
+          <strong>самооценки по описанию</strong>: внимательно прочитайте формулировки и отметьте <strong>один</strong>
+          вариант в каждом номере, который лучше соответствует вашему состоянию за последние дни (в том числе сегодня).
+        </p>
+
+        <div class="test-intro-actions">
+          <button type="button" class="btn btn--primary" id="btn-test-start">Начать тест</button>
+        </div>
+      </section>
+
+      <section id="test-step-specialist" class="test-step-specialist" hidden>
+        <p class="test-step-specialist__hint">
+          Выберите специалиста — он будет указан в отчёте Word. Затем перейдите к вопросам опросника.
+        </p>
+        <div class="specialist-bar" id="specialist-bar">
+          <p class="specialist-bar__title">ВЫБЕРИТЕ СПЕЦИАЛИСТА</p>
+          <div class="specialist-bar__row">
+            <button
+              type="button"
+              class="btn btn--ghost"
+              id="btn-specialist"
+              aria-haspopup="dialog"
+              aria-controls="specialist-modal"
+            >
+              Специалист
+            </button>
+            <span class="specialist-current" id="specialist-current">Не выбран</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn--primary" id="btn-test-to-questions">Перейти к вопросам</button>
+      </section>
+
+      <div id="test-shell" class="test-shell" hidden>
+        <div class="test-form-row">
+          <form id="hars-form" class="bdi-form"></form>
+          <aside class="question-rail" id="hars-rail" aria-label="Номера вопросов"></aside>
+        </div>
+      </div>
+
+      <section class="results results--bai" id="results" hidden>
+        <h2>Результат</h2>
+        <div class="results__grid">
+          <div class="result-card">
+            <span class="result-card__label">Суммарный балл (0–56)</span>
+            <span class="result-card__value" id="score-total">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-card__label">Интерпретация (ориентировочно)</span>
+            <p class="result-card__hint" id="interpret-total"></p>
+          </div>
+        </div>
+        <div class="results__actions">
+          <button type="button" class="btn btn--primary" id="btn-download">Скачать отчёт (Word)</button>
+        </div>
+      </section>
+
+      <footer class="footer footer--disclaimer">
+        Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
+      </footer>
+    </div>
+
+    <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
+      <div class="specialist-modal__backdrop" aria-hidden="true"></div>
+      <div
+        class="specialist-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="specialist-modal-title"
+      >
+        <h2 id="specialist-modal-title" class="specialist-modal__title">Специалист</h2>
+        <p class="specialist-modal__lead">Выберите специалиста — он будет указан в начале отчёта Word.</p>
+        <div id="specialist-modal-list" class="specialist-modal__list"></div>
+        <button type="button" class="btn btn--primary specialist-modal__close" id="specialist-modal-close">
+          Готово
+        </button>
+      </div>
+    </div>
+
+  </body>
+</html>
