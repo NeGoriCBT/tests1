@@ -29,7 +29,15 @@ import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 
 /**
- * @param {{ wordFileBase?: string; wordSubtitle?: string | null; steps?: typeof MH_STEPS_DEFAULT; lifeWordPreviewRoot?: HTMLElement | null; diseaseWordPreviewRoot?: HTMLElement | null }} opts
+ * @param {{
+ *   wordFileBase?: string;
+ *   wordSubtitle?: string | null;
+ *   steps?: typeof MH_STEPS_DEFAULT;
+ *   lifeWordPreviewRoot?: HTMLElement | null;
+ *   diseaseWordPreviewRoot?: HTMLElement | null;
+ *   unifiedWordPreviewRoot?: HTMLElement | null;
+ *   unifiedWordPreviewResultsRoot?: HTMLElement | null;
+ * }} opts
  */
 export function initMentalHelpApp(opts = {}) {
   const wordFileBase = opts.wordFileBase ?? "MentalHelp_anketa";
@@ -37,6 +45,8 @@ export function initMentalHelpApp(opts = {}) {
   const steps = opts.steps ?? MH_STEPS_DEFAULT;
   const lifeWordPreviewRoot = opts.lifeWordPreviewRoot ?? null;
   const diseaseWordPreviewRoot = opts.diseaseWordPreviewRoot ?? null;
+  const unifiedWordPreviewRoot = opts.unifiedWordPreviewRoot ?? null;
+  const unifiedWordPreviewResultsRoot = opts.unifiedWordPreviewResultsRoot ?? null;
 
   const welcomeEl = document.getElementById("mh-step-welcome");
 const doctorEl = document.getElementById("mh-step-doctor");
@@ -49,7 +59,34 @@ const nextWizardBtn = document.getElementById("mh-btn-wizard-next");
 
 /** @type {Record<string, string>} */
 const answers = {};
+/** Снимки ответов по шагам (жалобы / жизнь / болезнь), чтобы не терять данные при смене экрана. */
+/** @type {Record<string, string>} */
+const stepSnapshots = {};
 let qIndex = 0;
+
+/** @param {{ id: string }} step */
+function saveStepSnapshot(step) {
+  if (step.id === "complaints") {
+    stepSnapshots.complaints = answers.complaints ?? "";
+  } else {
+    stepSnapshots[step.id] = answers[step.id] ?? "";
+  }
+}
+
+function restoreAllStepSnapshots() {
+  for (const step of steps) {
+    const snap = stepSnapshots[step.id];
+    if (typeof snap !== "string") continue;
+    if (step.id === "complaints") answers.complaints = snap;
+    else answers[step.id] = snap;
+  }
+}
+
+/** Считать текущий шаг из DOM и подставить сохранённые ответы всех пройденных шагов. */
+function persistAllAnswersForWord() {
+  readCurrentStep();
+  restoreAllStepSnapshots();
+}
 
 function syncLifeWordPreview() {
   if (!lifeWordPreviewRoot || !contentEl) return;
@@ -63,9 +100,9 @@ function syncLifeWordPreview() {
     return;
   }
   lifeWordPreviewRoot.hidden = false;
-  const temp = { ...answers };
-  readLifeStructuredFromDom(contentEl, temp);
-  const state = parseLifeStructuredString(temp[LIFE_STRUCTURED_ID]);
+  readLifeStructuredFromDom(contentEl, answers);
+  saveStepSnapshot({ id: LIFE_STRUCTURED_ID });
+  const state = parseLifeStructuredString(answers[LIFE_STRUCTURED_ID]);
   const text = formatLifeStructuredForWord(state, getSelectedPatientGender()).trim();
   pre.textContent = text || "—";
 }
@@ -82,27 +119,56 @@ function syncDiseaseWordPreview() {
     return;
   }
   diseaseWordPreviewRoot.hidden = false;
-  const temp = { ...answers };
-  readDiseaseStructuredFromDom(contentEl, temp);
-  const state = parseDiseaseStructuredString(temp[DISEASE_STRUCTURED_ID]);
+  readDiseaseStructuredFromDom(contentEl, answers);
+  saveStepSnapshot({ id: DISEASE_STRUCTURED_ID });
+  const state = parseDiseaseStructuredString(answers[DISEASE_STRUCTURED_ID]);
   const { text, warnings } = formatDiseaseStructuredWithMeta(state, getSelectedPatientGender());
   const warnBlock =
     warnings.length > 0 ? `\n\n⚠ Проверьте:\n${warnings.map((w) => `• ${w}`).join("\n")}` : "";
   pre.textContent = (text || "—") + warnBlock;
 }
 
-if (wizardEl && (lifeWordPreviewRoot || diseaseWordPreviewRoot)) {
+function readAllAnswersFromDomForPreview() {
+  persistAllAnswersForWord();
+}
+
+function syncUnifiedWordPreview() {
+  if (!unifiedWordPreviewRoot && !unifiedWordPreviewResultsRoot) return;
+  const wizardShown = wizardEl && !wizardEl.hidden;
+  const resultsShown = resultsEl && !resultsEl.hidden;
+  if (unifiedWordPreviewRoot) unifiedWordPreviewRoot.hidden = !wizardShown;
+  if (unifiedWordPreviewResultsRoot) unifiedWordPreviewResultsRoot.hidden = !resultsShown;
+  if (!wizardShown && !resultsShown) return;
+
+  persistAllAnswersForWord();
+  const gender = getSelectedPatientGender();
+  const bodies = buildWordBlockBody(answers, gender, steps);
+  const text = MH_WORD_SECTIONS.map(({ wordKey, heading }) => {
+    const body = bodies[wordKey] || "—";
+    return `${heading}\n${body}`;
+  }).join("\n\n");
+
+  const preWizard = unifiedWordPreviewRoot?.querySelector("#mh-unified-word-preview");
+  if (preWizard instanceof HTMLElement) preWizard.textContent = text || "—";
+  const preResults = unifiedWordPreviewResultsRoot?.querySelector("#mh-unified-word-preview-results");
+  if (preResults instanceof HTMLElement) preResults.textContent = text || "—";
+}
+
+if (wizardEl && (lifeWordPreviewRoot || diseaseWordPreviewRoot || unifiedWordPreviewRoot)) {
   wizardEl.addEventListener("input", () => {
     if (steps[qIndex]?.id === LIFE_STRUCTURED_ID) syncLifeWordPreview();
     if (steps[qIndex]?.id === DISEASE_STRUCTURED_ID) syncDiseaseWordPreview();
+    syncUnifiedWordPreview();
   });
   wizardEl.addEventListener("change", () => {
     if (steps[qIndex]?.id === LIFE_STRUCTURED_ID) syncLifeWordPreview();
     if (steps[qIndex]?.id === DISEASE_STRUCTURED_ID) syncDiseaseWordPreview();
+    syncUnifiedWordPreview();
   });
   wizardEl.addEventListener("click", () => {
     if (steps[qIndex]?.id === LIFE_STRUCTURED_ID) syncLifeWordPreview();
     if (steps[qIndex]?.id === DISEASE_STRUCTURED_ID) syncDiseaseWordPreview();
+    syncUnifiedWordPreview();
   });
 }
 
@@ -123,18 +189,22 @@ function readCurrentStep() {
   if (!step) return;
   if (step.id === "complaints") {
     readComplaintsFromDom();
+    saveStepSnapshot(step);
     return;
   }
   if (step.id === LIFE_STRUCTURED_ID) {
     readLifeStructuredFromDom(contentEl, answers);
+    saveStepSnapshot(step);
     return;
   }
   if (step.id === DISEASE_STRUCTURED_ID) {
     readDiseaseStructuredFromDom(contentEl, answers);
+    saveStepSnapshot(step);
     return;
   }
   const ta = contentEl.querySelector("textarea.mh-textarea");
   if (ta) answers[step.id] = ta.value;
+  saveStepSnapshot(step);
 }
 
 function readComplaintsFromDom() {
@@ -278,6 +348,7 @@ function renderComplaintsStep() {
   nextWizardBtn.textContent = qIndex >= steps.length - 1 ? "Завершить" : "Далее";
   syncLifeWordPreview();
   syncDiseaseWordPreview();
+  syncUnifiedWordPreview();
 }
 
 function renderWizardStep() {
@@ -299,6 +370,7 @@ function renderWizardStep() {
     );
     syncLifeWordPreview();
     syncDiseaseWordPreview();
+    syncUnifiedWordPreview();
     return;
   }
   if (step.id === DISEASE_STRUCTURED_ID) {
@@ -312,6 +384,7 @@ function renderWizardStep() {
     );
     syncDiseaseWordPreview();
     syncLifeWordPreview();
+    syncUnifiedWordPreview();
     return;
   }
 
@@ -359,6 +432,7 @@ function renderWizardStep() {
   nextWizardBtn.textContent = qIndex >= steps.length - 1 ? "Завершить" : "Далее";
   syncLifeWordPreview();
   syncDiseaseWordPreview();
+  syncUnifiedWordPreview();
 }
 
 function goWelcome() {
@@ -386,9 +460,10 @@ function goWizard(index) {
 }
 
 function goResults() {
-  readCurrentStep();
+  persistAllAnswersForWord();
   hideAllSteps();
   show(resultsEl, true);
+  syncUnifiedWordPreview();
   resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -459,6 +534,7 @@ document.getElementById("btn-download")?.addEventListener("click", async () => {
     alert("Пол не указан. Вернитесь к шагу «Пол» и выберите «Мужской» или «Женский».");
     return;
   }
+  persistAllAnswersForWord();
   const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await import("docx");
   const dateStr = new Date().toLocaleString("ru-RU");
   const bodies = buildWordBlockBody(answers, genderVal, steps);

@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
-    <title>Анкета перед приёмом — Mental Help</title>
-    <script type="module" crossorigin src="./assets/mentalHelp-BN_PD0oA.js"></script>
+    <title>Полная анкета — Mental Help</title>
+    <script type="module" crossorigin src="./assets/mentalHelpUnified-BYjQvWIh.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/global-B_Jj1ot9.js">
     <link rel="modulepreload" crossorigin href="./assets/specialist-modal-cnUNIjyS.js">
     <link rel="modulepreload" crossorigin href="./assets/mental-help-app-C0qC_9C4.js">
@@ -21,7 +21,7 @@
           if (!location.hostname.endsWith("github.io")) return;
           if (location.pathname.includes("/docs/")) return;
           if (document.head.querySelector('script[src*="assets/"]')) return;
-          location.replace(new URL("docs/mental-help.html", location.href).href);
+          location.replace(new URL("docs/mental-help-unified.html", location.href).href);
         }
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
@@ -41,21 +41,21 @@
       <div class="mh-shell">
         <section id="mh-step-welcome" class="instruction mh-step">
           <header class="header" style="margin-bottom: 1rem">
-            <h1>Анкета перед приёмом</h1>
-            <p class="lead">Центр психологического консультирования Mental Help</p>
+            <h1>Полная анкета Mental Help</h1>
+            <p class="lead">Жалобы · анамнез жизни · анамнез заболевания · один документ Word</p>
           </header>
-          <p>Вас приветствует центр психологического консультирования Mental Help.</p>
-          <h2 class="mh-subheading">Что это даст вам</h2>
+          <p>
+            Единая анкета перед приёмом: три блока подряд. В конце формируется один файл Word с разделами
+            «Жалобы», «Анамнез жизни» и «Анамнез заболевания».
+          </p>
           <ol class="mh-benefits">
-            <li>Врач придёт на приём уже подготовленным и сможет глубже погрузиться в ваш случай.</li>
-            <li>У вас останется больше времени на вопросы, обсуждение переживаний и персональный подбор лечения.</li>
-            <li>Сама консультация пройдёт спокойнее и продуктивнее.</li>
+            <li>Жалобы — что беспокоит сейчас.</li>
+            <li>Анамнез жизни — семья, образование, работа, здоровье.</li>
+            <li>Анамнез заболевания — эпизоды, лечение, текущее состояние.</li>
           </ol>
           <p class="privacy-note">
-            <strong>Важно.</strong> Анкета полностью анонимна. Указывать фамилию, паспортные и другие личные данные не нужно.
-          </p>
-          <p class="privacy-note">
-            <strong>Конфиденциальность.</strong> Ответы никуда не отправляются и не сохраняются на сервере: данные остаются в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве.
+            <strong>Важно.</strong> Анкета анонимна. Ответы не отправляются на сервер; файл Word формируется локально в
+            браузере.
           </p>
           <div class="mh-actions">
             <button type="button" class="btn btn--primary" id="mh-btn-welcome-next">Далее</button>
@@ -64,12 +64,7 @@
 
         <section id="mh-step-doctor" class="instruction mh-step" hidden>
           <h2 class="mh-block-title">Выбор врача</h2>
-          <p>
-            Заполнение займёт около 10–15 минут. Пожалуйста, проходите её в спокойной обстановке — это поможет нам максимально эффективно помочь вам.
-          </p>
-          <p>
-            Выберите врача, к которому вы записаны на приём. Это единственная информация, которая свяжет ваши ответы с предстоящей консультацией. Сама анкета остаётся анонимной.
-          </p>
+          <p>Укажите врача — он будет указан в шапке документа Word.</p>
           <div class="specialist-bar" id="specialist-bar" style="margin-top: 1rem">
             <p class="specialist-bar__title">ВЫБЕРИТЕ ВРАЧА</p>
             <div class="specialist-bar__row">
@@ -93,7 +88,7 @@
 
         <section id="mh-step-gender" class="instruction mh-step" hidden>
           <h2 class="mh-block-title">Пол</h2>
-          <p>Укажите пол для отчёта Word.</p>
+          <p>Укажите пол для формулировок в тексте отчёта (обращался / обращалась и т.д.).</p>
           <fieldset class="test-step-gender__fieldset">
             <legend class="test-step-gender__legend">Пол</legend>
             <div class="test-step-gender__options">
@@ -116,17 +111,26 @@
         <section id="mh-step-wizard" class="instruction mh-step" hidden>
           <p class="mh-progress" id="mh-progress" aria-live="polite"></p>
           <div id="mh-wizard-content"></div>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap" hidden>
+            <h3 class="mh-word-life-preview__title">Текст для Word (весь документ)</h3>
+            <p class="mh-word-life-preview__hint">
+              Жалобы, анамнез жизни и анамнез заболевания. Обновляется при изменении полей.
+            </p>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview"></pre>
+          </div>
           <div class="mh-actions">
             <button type="button" class="btn btn--ghost" id="mh-btn-wizard-back">Назад</button>
-            <button type="button" class="btn btn--primary" id="mh-btn-wizard-next">Далее</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-wizard-next">Завершить</button>
           </div>
         </section>
 
         <section class="results results--bai mh-step" id="results" hidden>
           <h2>Готово</h2>
-          <p class="result-card__hint">
-            Анкета заполнена. Скачайте документ Word и передайте его на приём или отправьте удобным для вас способом.
-          </p>
+          <p class="result-card__hint">Скачайте единый документ Word со всеми тремя разделами.</p>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap-results">
+            <h3 class="mh-word-life-preview__title">Текст для Word (весь документ)</h3>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview-results"></pre>
+          </div>
           <div class="results__actions">
             <button type="button" class="btn btn--primary" id="btn-download">Скачать анкету (Word)</button>
           </div>
@@ -147,7 +151,7 @@
         aria-labelledby="specialist-modal-title"
       >
         <h2 id="specialist-modal-title" class="specialist-modal__title">Врач</h2>
-        <p class="specialist-modal__lead">Выберите врача, к которому вы записаны — он будет указан в начале документа Word.</p>
+        <p class="specialist-modal__lead">Выберите врача — он будет указан в начале документа Word.</p>
         <div id="specialist-modal-list" class="specialist-modal__list"></div>
         <button type="button" class="btn btn--primary specialist-modal__close" id="specialist-modal-close">Готово</button>
       </div>

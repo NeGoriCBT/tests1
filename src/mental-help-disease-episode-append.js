@@ -528,5 +528,37 @@ export function appendDiseaseEpisodeBlock(wrap, ep, ei, totalCount, radioRow, re
     });
   });
   wrap.appendChild(fs6);
+
+  if (isLast) {
+    const fs7 = fieldset("7. Обращение в клинику Mental Help");
+    const mhHint = document.createElement("p");
+    mhHint.className = "mh-prompt";
+    mhHint.textContent =
+      "С указанными жалобами принято решение обратиться в клинику Mental Help. Укажите причину обращения:";
+    fs7.appendChild(mhHint);
+    const mhReason = String(ep.mhClinicVisitReason ?? "");
+    fs7.appendChild(radioRow(`${id}-mh-visit`, "own_wish", "По собственному желанию", mhReason === "own_wish"));
+    fs7.appendChild(radioRow(`${id}-mh-visit`, "relatives", "По настоянию родственников", mhReason === "relatives"));
+    const mhDetailP = document.createElement("p");
+    mhDetailP.className = "mh-prompt";
+    mhDetailP.textContent = "Дополнительно опишите обстоятельства обращения (необязательно):";
+    fs7.appendChild(mhDetailP);
+    const mhDetail = document.createElement("textarea");
+    mhDetail.id = `${id}-mh-visit-detail`;
+    mhDetail.className = "mh-life-text";
+    mhDetail.rows = 3;
+    mhDetail.placeholder = "Например: сохраняются жалобы на тревогу и нарушение сна";
+    mhDetail.value = String(ep.mhClinicVisitDetail ?? "");
+    fs7.appendChild(mhDetail);
+    function syncMhVisitBlock() {
+      const r = fs1.querySelector(`input[name="${id}-dur"]:checked`);
+      const v = r instanceof HTMLInputElement ? r.value : "";
+      fs7.hidden = v !== "current";
+    }
+    fs1.querySelectorAll(`input[name="${id}-dur"]`).forEach((el) => el.addEventListener("change", syncMhVisitBlock));
+    syncMhVisitBlock();
+    wrap.appendChild(fs7);
+  }
+
   return wrap;
 }

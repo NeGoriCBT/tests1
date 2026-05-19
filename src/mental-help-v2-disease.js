@@ -847,6 +847,11 @@ function readOneEpisodeFromBlock(root, wrap) {
     medsPrescribed: rxVal,
     episodeMeds,
     improvementDurationMonths: valOf(root, `#${id}-imp-dur`),
+    mhClinicVisitReason: (() => {
+      const r = wrap.querySelector(`input[name="${id}-mh-visit"]:checked`);
+      return r instanceof HTMLInputElement ? r.value : "";
+    })(),
+    mhClinicVisitDetail: valOf(root, `#${id}-mh-visit-detail`),
   };
 }
 

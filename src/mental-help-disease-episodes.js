@@ -93,6 +93,11 @@ const SPEC_WORD = {
 
 const SPEC_LABEL = Object.fromEntries(PSYCH_SPEC_CODES);
 
+export const MH_CLINIC_VISIT_REASON_LABELS = {
+  own_wish: "по собственному желанию",
+  relatives: "по настоянию родственников",
+};
+
 function listWithAnd(parts) {
   const p = parts.filter(Boolean);
   if (!p.length) return "";
@@ -197,6 +202,8 @@ export function defaultEpisode() {
     medsPrescribed: "",
     episodeMeds: [],
     improvementDurationMonths: "",
+    mhClinicVisitReason: "",
+    mhClinicVisitDetail: "",
   };
 }
 
@@ -238,6 +245,18 @@ export function normalizeEpisode(raw) {
   } else if (mp !== "yes") {
     episodeMeds = [];
   }
+  const durationEndMode = typeof o.durationEndMode === "string" ? o.durationEndMode : "";
+  const mhReasonRaw = typeof o.mhClinicVisitReason === "string" ? o.mhClinicVisitReason : "";
+  const mhClinicVisitReason =
+    durationEndMode === "current" && (mhReasonRaw === "own_wish" || mhReasonRaw === "relatives")
+      ? mhReasonRaw
+      : "";
+  const mhClinicVisitDetail =
+    durationEndMode === "current" && mhClinicVisitReason
+      ? typeof o.mhClinicVisitDetail === "string"
+        ? o.mhClinicVisitDetail.trim()
+        : ""
+      : "";
   return {
     startMode: typeof o.startMode === "string" ? o.startMode : "",
     startMonth: typeof o.startMonth === "string" ? o.startMonth : "",
@@ -262,7 +281,28 @@ export function normalizeEpisode(raw) {
     medsPrescribed: mp === "yes" || mp === "no" ? mp : "",
     episodeMeds,
     improvementDurationMonths: typeof o.improvementDurationMonths === "string" ? o.improvementDurationMonths : "",
+    mhClinicVisitReason,
+    mhClinicVisitDetail,
   };
+}
+
+/** @param {Record<string, unknown>} ep @param {"male" | "female" | null} gender */
+function formatMhClinicVisitSentence(ep, gender) {
+  if (String(ep.durationEndMode ?? "") !== "current") return "";
+  const reason = String(ep.mhClinicVisitReason ?? "");
+  const reasonLabel =
+    MH_CLINIC_VISIT_REASON_LABELS[/** @type {keyof typeof MH_CLINIC_VISIT_REASON_LABELS} */ (reason)] ?? "";
+  if (!reasonLabel) return "";
+  const decided = genderPhrase(
+    gender,
+    "решил обратиться",
+    "решила обратиться",
+    "принято решение обратиться",
+  );
+  const detail = String(ep.mhClinicVisitDetail ?? "").trim();
+  let line = `С указанными жалобами ${decided} в клинику Mental Help ${reasonLabel}`;
+  if (detail) line += ` (${detail})`;
+  return `${line}.`;
 }
 
 /**
@@ -562,6 +602,11 @@ function formatSingleEpisodeParagraph(ep, ctx) {
     sentences.push(ln);
   }
 
+  if (ctx.isLast && String(ep.durationEndMode ?? "") === "current") {
+    const mh = formatMhClinicVisitSentence(ep, ctx.gender);
+    if (mh) sentences.push(mh);
+  }
+
   const body = sentences.filter(Boolean).join(" ");
   if (!body) return "";
 
@@ -658,6 +703,12 @@ export function collectDiseaseFormatWarnings(episodes, gender) {
     });
     if (hasImp && !String(ep.improvementDurationMonths ?? "").trim()) {
       warnings.push(`Эпизод ${n}: отмечено улучшение без длительности remission.`);
+    }
+    if (String(ep.durationEndMode ?? "") === "current" && i === eps.length - 1) {
+      const r = String(ep.mhClinicVisitReason ?? "");
+      if (r !== "own_wish" && r !== "relatives") {
+        warnings.push(`Эпизод ${n}: укажите причину обращения в клинику Mental Help.`);
+      }
     }
   });
 
