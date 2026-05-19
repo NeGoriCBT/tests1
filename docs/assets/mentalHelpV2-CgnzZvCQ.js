@@ -1,0 +1,1 @@
+import"./global-B_Jj1ot9.js";/* empty css                  */import"./specialist-modal-cnUNIjyS.js";import{M as t,i}from"./mental-help-app-Bu8pbRNt.js";const o=t.filter(e=>e.wordKey!=="life"),r=[...o,{id:"life-structured",wordKey:"life",codeLabel:"Анамнез жизни",prompt:""}];i({wordFileBase:"MentalHelp_v2_anketa",wordSubtitle:"Вторая версия анкеты",steps:r});
