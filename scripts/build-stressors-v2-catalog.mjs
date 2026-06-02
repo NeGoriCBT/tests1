@@ -57,3 +57,4 @@ const body =
 
 fs.writeFileSync(OUT, body, "utf8");
 console.log(`Wrote ${OUT}: ${deduped.length} sections, ${total} items`);
+console.log("Run: npm run build:stressors-genitive");

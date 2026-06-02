@@ -11,6 +11,7 @@
     "sync:early-symptoms-doc": "python3 scripts/sync_early_symptoms_from_docx.py",
     "build:early-symptoms-catalog": "node scripts/build-early-symptoms-v2-catalog.mjs",
     "build:stressors-catalog": "node scripts/build-stressors-v2-catalog.mjs",
+    "build:stressors-genitive": "node scripts/build-stressors-genitive.mjs",
     "build:somatic-specialties-catalog": "node scripts/build-somatic-specialties-v2-catalog.mjs",
     "build:disease-drugs-catalog": "node scripts/build-disease-drugs-catalog.mjs",
     "preview": "vite preview"
