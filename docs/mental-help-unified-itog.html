@@ -4,14 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
-    <title>Анамнез жизни — Mental Help</title>
-    <script type="module" crossorigin src="./assets/mentalHelpLifeOnly-Cbketn1T.js"></script>
+    <title>Полная анкета — итог · Mental Help</title>
+    <script type="module" crossorigin src="./assets/mentalHelpUnifiedItog-DFi-DdXr.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/global-B_Jj1ot9.js">
     <link rel="modulepreload" crossorigin href="./assets/specialist-modal-cnUNIjyS.js">
     <link rel="modulepreload" crossorigin href="./assets/mental-help-app-C1PyH1c1.js">
+    <link rel="modulepreload" crossorigin href="./assets/mental-help-unified-data-CuyA5U8R.js">
     <link rel="stylesheet" crossorigin href="./assets/global-FsqcezuS.css">
     <link rel="stylesheet" crossorigin href="./assets/specialist-modal-4jMUboik.css">
     <link rel="stylesheet" crossorigin href="./assets/mental-help-app-I1fQnYNy.css">
+    <link rel="stylesheet" crossorigin href="./assets/mentalHelpUnifiedItog-CF47LSGe.css">
     <link rel="stylesheet" crossorigin href="./assets/test-flow-BndxHd0y.css">
   </head>
   <body>
@@ -21,7 +23,7 @@
           if (!location.hostname.endsWith("github.io")) return;
           if (location.pathname.includes("/docs/")) return;
           if (document.head.querySelector('script[src*="assets/"]')) return;
-          location.replace(new URL("docs/mental-help-life-only.html", location.href).href);
+          location.replace(new URL("docs/mental-help-unified-itog.html", location.href).href);
         }
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
@@ -33,27 +35,33 @@
     <noscript>
       <div class="noscript-banner">Для работы анкеты включите JavaScript в настройках браузера.</div>
     </noscript>
-    <div class="layout layout--wide">
+    <div class="layout layout--wide layout--itog">
       <nav class="breadcrumb" aria-label="Навигация">
         <a href="./index.html">← Все тесты</a>
       </nav>
 
-      <div class="mh-shell">
+      <div class="mh-shell mh-shell--itog">
         <section id="mh-step-welcome" class="instruction mh-step">
           <header class="header" style="margin-bottom: 1rem">
-            <h1>Анамнез жизни</h1>
-            <p class="lead">Центр психологического консультирования Mental Help · только блок «Анамнез жизни»</p>
+            <h1>Полная анкета — итог</h1>
+            <p class="lead">Удобный интерфейс · те же три раздела · тот же текст Word</p>
           </header>
           <p>
-            Это отдельная короткая анкета: те же поля, что и в разделе жизненного анамнеза полной анкеты. Внизу на шаге
-            заполнения показывается текст, который попадёт в документ Word в блок «Анамнез жизни».
+            Улучшенная версия полной анкеты: три категории по шагам, карточки вопросов и подсказки «?» в углу блока.
+            Итоговый документ для врача формируется по тем же правилам, что и в
+            <a href="./mental-help-unified.html">классической полной анкете</a>.
           </p>
+          <ol class="mh-benefits">
+            <li><strong>Жалобы</strong> — что беспокоит сейчас.</li>
+            <li><strong>Анамнез жизни</strong> — семья, развитие, школа, работа, здоровье.</li>
+            <li><strong>Анамнез заболевания</strong> — эпизоды, лечение, обращение в клинику.</li>
+          </ol>
           <p class="privacy-note">
-            <strong>Важно.</strong> Анкета анонимна. Ответы не отправляются на сервер и остаются в браузере; файл Word
-            формируется у вас на устройстве при скачивании.
+            <strong>Важно.</strong> Анкета анонимна. Ответы не отправляются на сервер; файл Word создаётся только у вас
+            в браузере.
           </p>
           <div class="mh-actions">
-            <button type="button" class="btn btn--primary" id="mh-btn-welcome-next">Далее</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-welcome-next">Начать</button>
           </div>
         </section>
 
@@ -83,7 +91,7 @@
 
         <section id="mh-step-gender" class="instruction mh-step" hidden>
           <h2 class="mh-block-title">Пол</h2>
-          <p>Укажите пол для отчёта Word (влияет на формулировки, например про армию).</p>
+          <p>Нужен для грамотных формулировок в отчёте (обращался / обращалась и т.д.).</p>
           <fieldset class="test-step-gender__fieldset">
             <legend class="test-step-gender__legend">Пол</legend>
             <div class="test-step-gender__options">
@@ -104,22 +112,37 @@
         </section>
 
         <section id="mh-step-wizard" class="instruction mh-step" hidden>
+          <nav class="mh-itog-categories" id="mh-itog-categories" aria-label="Разделы анкеты" hidden>
+            <button type="button" class="mh-itog-cat" data-cat="complaints" disabled>
+              <span class="mh-itog-cat__num">1</span>Жалобы
+            </button>
+            <button type="button" class="mh-itog-cat" data-cat="life" disabled>
+              <span class="mh-itog-cat__num">2</span>Анамнез жизни
+            </button>
+            <button type="button" class="mh-itog-cat" data-cat="disease" disabled>
+              <span class="mh-itog-cat__num">3</span>Анамнез болезни
+            </button>
+          </nav>
           <p class="mh-progress" id="mh-progress" aria-live="polite"></p>
           <div id="mh-wizard-content"></div>
-          <div class="mh-word-life-preview" id="mh-life-word-preview-wrap" hidden>
-            <h3 class="mh-word-life-preview__title">Текст для Word (блок «Анамнез жизни»)</h3>
-            <p class="mh-word-life-preview__hint">Обновляется при изменении полей на этом шаге.</p>
-            <pre class="mh-word-life-preview__body" id="mh-life-word-preview"></pre>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap" hidden>
+            <h3 class="mh-word-life-preview__title">Предпросмотр текста для Word</h3>
+            <p class="mh-word-life-preview__hint">Все три раздела. Обновляется при заполнении полей.</p>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview"></pre>
           </div>
           <div class="mh-actions">
             <button type="button" class="btn btn--ghost" id="mh-btn-wizard-back">Назад</button>
-            <button type="button" class="btn btn--primary" id="mh-btn-wizard-next">Завершить</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-wizard-next">Далее</button>
           </div>
         </section>
 
         <section class="results results--bai mh-step" id="results" hidden>
           <h2>Готово</h2>
-          <p class="result-card__hint">Скачайте документ Word при необходимости.</p>
+          <p class="result-card__hint">Скачайте документ Word — тот же формат, что в классической полной анкете.</p>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap-results">
+            <h3 class="mh-word-life-preview__title">Текст для Word</h3>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview-results"></pre>
+          </div>
           <div class="results__actions">
             <button type="button" class="btn btn--primary" id="btn-download">Скачать анкету (Word)</button>
           </div>

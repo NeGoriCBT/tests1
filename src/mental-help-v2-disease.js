@@ -20,6 +20,7 @@ import {
 } from "./mental-help-disease-episodes.js";
 import { appendDiseaseEpisodeBlock } from "./mental-help-disease-episode-append.js";
 import { createDrugChipPicker } from "./mental-help-disease-pickers.js";
+import { enhanceItogDiseaseStep, isItogMode } from "./mental-help-itog-ui.js";
 
 const DRUG_MOLECULE = { get: (/** @type {string} */ id) => drugIdToMolecule(id) };
 import {
@@ -1339,20 +1340,44 @@ function createRelapseEpisodeBlock(ep, ei, radioRow, readStateFromDom, reflowVis
   return wrap;
 }
 
-export function renderDiseaseStructuredStep(contentEl, answers, qIndex, stepsLen, gender, nextWizardBtn) {
+/**
+ * @param {{ title: string; intro: string } | null} [blockLeadOverride]
+ */
+export function renderDiseaseStructuredStep(contentEl, answers, qIndex, stepsLen, gender, nextWizardBtn, blockLeadOverride) {
   const state = parseDiseaseStructuredString(answers[DISEASE_STRUCTURED_ID]);
   contentEl.replaceChildren();
+  delete contentEl.dataset.itogEnhanced;
+  if (blockLeadOverride) {
+    try {
+      contentEl.dataset.mhBlockLead = JSON.stringify(blockLeadOverride);
+    } catch {
+      delete contentEl.dataset.mhBlockLead;
+    }
+  }
 
   const progressEl = contentEl.closest(".mh-step")?.querySelector(".mh-progress");
   if (progressEl) progressEl.textContent = `Шаг опросника: ${qIndex + 1} из ${stepsLen}`;
 
+  /** @type {{ title: string; intro: string } | undefined} */
+  let parsedLead = blockLeadOverride ?? undefined;
+  if (!parsedLead && contentEl.dataset.mhBlockLead) {
+    try {
+      parsedLead = JSON.parse(contentEl.dataset.mhBlockLead);
+    } catch {
+      parsedLead = undefined;
+    }
+  }
+  const lead = parsedLead ?? {
+    title: "Анамнез заболевания",
+    intro: "Заполните поля ниже — текст для Word формируется по правилам блока.",
+  };
   const h2 = document.createElement("h2");
   h2.className = "mh-block-title";
-  h2.textContent = "Анамнез заболевания";
+  h2.textContent = lead.title;
   contentEl.appendChild(h2);
   const intro = document.createElement("p");
   intro.className = "mh-prompt";
-  intro.textContent = "Заполните поля ниже — текст для Word формируется по правилам блока.";
+  intro.textContent = lead.intro;
   contentEl.appendChild(intro);
 
   function fieldset(title) {
@@ -1440,4 +1465,5 @@ export function renderDiseaseStructuredStep(contentEl, answers, qIndex, stepsLen
   contentEl.appendChild(addEp);
 
   if (nextWizardBtn) nextWizardBtn.textContent = qIndex >= stepsLen - 1 ? "Завершить" : "Далее";
+  if (isItogMode()) enhanceItogDiseaseStep(contentEl);
 }

@@ -1,6 +1,7 @@
 /**
  * Структурированный «Анамнез жизни» для второй версии анкеты (Mental Help v2).
  */
+import { enhanceItogLifeStep, isItogMode } from "./mental-help-itog-ui.js";
 
 export const LIFE_STRUCTURED_ID = "life-structured";
 
@@ -1248,6 +1249,7 @@ function section6WordLines(state) {
         ? `первые приступы в возрасте ${String(state.epilepsyFirstSeizureAge).trim()} лет`
         : "возраст первых приступов не помнит";
   if (state.epilepsyMedsStatus === "no") return [`Эпилепсия: ${first}. Лекарства не принимает.`];
+  if (state.epilepsyMedsStatus === "unknown") return [`Эпилепсия: ${first}. Приём противосудорожных препаратов не помнит.`];
   if (state.epilepsyMedsStatus === "yes") {
     const meds = Array.isArray(state.epilepsyMeds) ? state.epilepsyMeds.filter((x) => typeof x === "string" && x.trim()) : [];
     if (meds.length) return [`Эпилепсия: ${first}. Принимает противосудорожные препараты: ${listWithAnd(meds)}.`];
@@ -1267,6 +1269,7 @@ function section7WordLines(state) {
     return [m ? `Хронические заболевания: ${d}. Регулярно принимает: ${m}.` : `Хронические заболевания: ${d}.`];
   }
   if (state.chronicMedsRegular === "no") return [`Хронические заболевания: ${d}. Лекарства регулярно не принимает.`];
+  if (state.chronicMedsRegular === "unknown") return [`Хронические заболевания: ${d}. Регулярный приём лекарств не помнит.`];
   return [`Хронические заболевания: ${d}.`];
 }
 
@@ -1572,6 +1575,66 @@ function summarizeCaseForUi(c) {
   return formatOneHeredityCaseForWord(c) || JSON.stringify(c);
 }
 
+/** @param {ChildhoodVisit} v */
+function childhoodSpecialistUiLabel(v) {
+  const co = String(v.customOther ?? "").trim();
+  if (v.specialist === "custom") return co || "специалист (не указан)";
+  if (v.specialist === "psych") return "психиатр";
+  if (v.specialist === "endo") return "эндокринолог";
+  return "невролог";
+}
+
+/** @param {ChildhoodVisit} v */
+function summarizeChildhoodVisitForUi(v) {
+  const spec = childhoodSpecialistUiLabel(v);
+  if (v.reasonUnknown) return `${spec}, причина неизвестна`;
+  const r = String(v.reason ?? "").trim();
+  return r ? `${spec}: ${r}` : spec;
+}
+
+/** @param {HTMLElement} root @returns {ChildhoodVisit} */
+function readChildhoodDraftFromDom(root) {
+  const specSel = root.querySelector("#mh-life-ch-draft-specialist");
+  const specialist =
+    specSel instanceof HTMLSelectElement && CHILDHOOD_SPECIALIST_CODES.has(specSel.value) ? specSel.value : "";
+  const customInp = root.querySelector("#mh-life-ch-draft-custom");
+  const customOther = customInp instanceof HTMLInputElement ? customInp.value.trim() : "";
+  const reasonInp = root.querySelector("#mh-life-ch-draft-reason");
+  const reason = reasonInp instanceof HTMLInputElement ? reasonInp.value.trim() : "";
+  const un = root.querySelector("#mh-life-ch-draft-reason-unknown");
+  const reasonUnknown = un instanceof HTMLInputElement && un.checked;
+  return {
+    specialist: specialist || "neuro",
+    customOther: specialist === "custom" ? customOther : "",
+    reason: reasonUnknown ? "" : reason,
+    reasonUnknown,
+  };
+}
+
+/** @param {ChildhoodVisit} draft */
+function validateChildhoodDraft(draft) {
+  if (!draft.specialist || !CHILDHOOD_SPECIALIST_CODES.has(draft.specialist)) {
+    return "Выберите специалиста из списка.";
+  }
+  if (draft.specialist === "custom" && !String(draft.customOther ?? "").trim()) {
+    return "Укажите специалиста (свой вариант).";
+  }
+  if (!draft.reasonUnknown && !String(draft.reason ?? "").trim()) {
+    return "Укажите причину наблюдения или отметьте «Не знаю причину».";
+  }
+  return "";
+}
+
+/** @param {ChildhoodVisit} draft */
+function isChildhoodDraftEmpty(draft) {
+  return (
+    (draft.specialist === "neuro" || !draft.specialist) &&
+    !String(draft.customOther ?? "").trim() &&
+    !String(draft.reason ?? "").trim() &&
+    !draft.reasonUnknown
+  );
+}
+
 /**
  * @param {HTMLElement} contentEl
  * @param {Record<string, string>} answers
@@ -1580,11 +1643,44 @@ function summarizeCaseForUi(c) {
  * @param {"male" | "female" | null} gender
  * @param {HTMLButtonElement | null} nextWizardBtn
  */
-export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, gender, nextWizardBtn) {
-  const step = { blockLead: { title: "Анамнез жизни", intro: "Заполните поля ниже." }, codeLabel: "Анамнез жизни", prompt: "" };
+/**
+ * @param {HTMLElement} contentEl
+ * @param {Record<string, string>} answers
+ * @param {number} qIndex
+ * @param {number} stepsLen
+ * @param {"male" | "female" | null} gender
+ * @param {HTMLButtonElement | null} nextWizardBtn
+ * @param {{ title: string; intro: string } | null} [blockLeadOverride]
+ */
+export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, gender, nextWizardBtn, blockLeadOverride) {
+  const step = {
+    blockLead: blockLeadOverride ?? { title: "Анамнез жизни", intro: "Заполните поля ниже." },
+    codeLabel: "Анамнез жизни",
+    prompt: "",
+  };
   const state = parseLifeStructuredString(answers[LIFE_STRUCTURED_ID]);
 
   contentEl.replaceChildren();
+  delete contentEl.dataset.itogEnhanced;
+  if (blockLeadOverride) {
+    try {
+      contentEl.dataset.mhBlockLead = JSON.stringify(blockLeadOverride);
+    } catch {
+      delete contentEl.dataset.mhBlockLead;
+    }
+  }
+  /** @type {{ title: string; intro: string } | undefined} */
+  let resolvedLead = blockLeadOverride ?? undefined;
+  if (!resolvedLead && contentEl.dataset.mhBlockLead) {
+    try {
+      resolvedLead = JSON.parse(contentEl.dataset.mhBlockLead);
+    } catch {
+      resolvedLead = undefined;
+    }
+  }
+  if (resolvedLead) {
+    step.blockLead = resolvedLead;
+  }
 
   const progressEl = contentEl.closest(".mh-step")?.querySelector(".mh-progress");
   if (progressEl) progressEl.textContent = `Шаг опросника: ${qIndex + 1} из ${stepsLen}`;
@@ -1706,19 +1802,20 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   listPanel.className = "mh-life-heredity-list-panel";
   listPanel.hidden = state.heredity !== "yes";
 
-  const fsList = fieldset("Уже добавлено в отягощённость");
+  const fsList = fieldset("Добавленные родственники");
   const listIntro = document.createElement("p");
   listIntro.className = "mh-life-hint";
   if (draftClosed) {
     listIntro.textContent =
       cases.length > 0
-        ? "Перечисление завершено. Нажмите «Добавить ещё», если нужно указать ещё одного родственника."
-        : "Перечисление завершено. Нажмите «Добавить ещё», чтобы указать родственника, или оставьте список пустым.";
+        ? "Перечисление завершено. Нажмите «Добавить ещё одного родственника», если нужно указать ещё одного."
+        : "Перечисление завершено. Можно добавить родственника кнопкой ниже или оставить список пустым.";
   } else if (cases.length) {
     listIntro.textContent =
-      "Список не сбрасывается при добавлении нового случая. Ниже заполните форму для следующего родственника.";
+      "Ниже — форма для следующего родственника. Уже добавленные остаются в списке.";
   } else {
-    listIntro.textContent = "Пока никого не добавили — заполните форму под этим списком и нажмите «Добавить ещё».";
+    listIntro.textContent =
+      "Заполните форму ниже и нажмите «Сохранить и добавить ещё одного» или «Сохранить и закончить».";
   }
   fsList.appendChild(listIntro);
   const ul = document.createElement("ul");
@@ -1760,7 +1857,8 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   const btnReopenDraft = document.createElement("button");
   btnReopenDraft.type = "button";
   btnReopenDraft.className = "mh-life-add-case";
-  btnReopenDraft.textContent = "Добавить ещё";
+  btnReopenDraft.textContent = "Добавить ещё одного родственника";
+  btnReopenDraft.className = "mh-life-btn mh-life-btn--secondary";
   btnReopenDraft.hidden = !draftClosed;
   listActions.appendChild(btnReopenDraft);
   listPanel.appendChild(listActions);
@@ -1775,7 +1873,7 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   draftWrap.className = "mh-life-heredity-draft-wrap";
   const draftTitle = document.createElement("p");
   draftTitle.className = "mh-life-heredity-draft-title";
-  draftTitle.textContent = "Следующий случай (форма обнуляется после «Добавить ещё»)";
+  draftTitle.textContent = "Следующий родственник";
   draftWrap.appendChild(draftTitle);
 
   const fsWho = fieldset("1.1. Кто именно");
@@ -1856,20 +1954,16 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   addRow.className = "mh-life-heredity-actions";
   const btnAdd = document.createElement("button");
   btnAdd.type = "button";
-  btnAdd.className = "mh-life-add-case";
-  btnAdd.textContent = "Добавить ещё";
+  btnAdd.className = "mh-life-btn mh-life-btn--primary";
+  btnAdd.textContent = "Сохранить и добавить ещё одного";
   const btnFinish = document.createElement("button");
   btnFinish.type = "button";
-  btnFinish.className = "mh-life-heredity-icon-btn mh-life-heredity-icon-btn--ok";
-  btnFinish.textContent = "✓";
-  btnFinish.setAttribute("aria-label", "Сохранить текущий случай в список и завершить перечисление");
-  btnFinish.title = "Сохранить текущий выбор в список и завершить перечисление";
+  btnFinish.className = "mh-life-btn mh-life-btn--secondary";
+  btnFinish.textContent = "Сохранить и закончить";
   const btnClearDraft = document.createElement("button");
   btnClearDraft.type = "button";
-  btnClearDraft.className = "mh-life-heredity-icon-btn mh-life-heredity-icon-btn--clear";
-  btnClearDraft.textContent = "✗";
-  btnClearDraft.setAttribute("aria-label", "Очистить форму");
-  btnClearDraft.title = "Очистить форму";
+  btnClearDraft.className = "mh-life-btn mh-life-btn--ghost";
+  btnClearDraft.textContent = "Очистить форму";
   addRow.appendChild(btnAdd);
   addRow.appendChild(btnFinish);
   addRow.appendChild(btnClearDraft);
@@ -2218,23 +2312,8 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   chYesWrap.hidden = state.childhoodSpecialists !== "yes";
   const childhoodDraftClosed = state.childhoodSpecialists === "yes" && state.childhoodVisitsCloseDraft === true;
 
-  const visitsHint = document.createElement("p");
-  visitsHint.className = "mh-life-hint";
-  visitsHint.textContent = childhoodDraftClosed
-    ? "Перечисление завершено. Нажмите «Добавить ещё», если нужно указать еще одного специалиста."
-    : "Для каждого специалиста выберите врача из списка или «Свой вариант», укажите причину наблюдения либо отметьте «Не знаю причину».";
-  chYesWrap.appendChild(visitsHint);
-
-  const visitsList = document.createElement("div");
-  visitsList.id = "mh-life-childhood-visits-list";
-  visitsList.className = "mh-life-childhood-visits-list";
-
-  const visitStates = /** @type {ChildhoodVisit[]} */ (
-    state.childhoodSpecialists === "yes"
-      ? Array.isArray(state.childhoodVisits) && state.childhoodVisits.length
-        ? state.childhoodVisits
-        : [{ specialist: "neuro", customOther: "", reason: "", reasonUnknown: false }]
-      : []
+  const chCases = /** @type {ChildhoodVisit[]} */ (
+    state.childhoodSpecialists === "yes" && Array.isArray(state.childhoodVisits) ? state.childhoodVisits : []
   );
 
   function reflowChildhood(mutator) {
@@ -2249,172 +2328,219 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
     });
   }
 
-  /** @param {ChildhoodVisit} v @param {number} idx @param {number} total */
-  function appendChildhoodVisitRow(v, idx, total) {
-    const row = document.createElement("div");
-    row.className = "mh-life-childhood-visit";
-    row.dataset.index = String(idx);
+  const chListPanel = document.createElement("div");
+  chListPanel.className = "mh-life-childhood-list-panel";
 
-    const rowTitle = document.createElement("p");
-    rowTitle.className = "mh-life-childhood-visit-title";
-    rowTitle.textContent = `Специалист ${idx + 1}`;
-    row.appendChild(rowTitle);
-
-    const specRow = document.createElement("div");
-    specRow.className = "mh-life-row";
-    specRow.appendChild(document.createTextNode("Врач: "));
-    const specSel = document.createElement("select");
-    specSel.className = "mh-life-select mh-life-ch-visit-specialist";
-    [
-      ["neuro", "Врач невролог"],
-      ["psych", "Врач психиатр"],
-      ["endo", "Врач эндокринолог"],
-      ["custom", "Свой вариант"],
-    ].forEach(([val, lab]) => {
-      const o = document.createElement("option");
-      o.value = val;
-      o.textContent = lab;
-      if (v.specialist === val) o.selected = true;
-      specSel.appendChild(o);
-    });
-    specRow.appendChild(specSel);
-    row.appendChild(specRow);
-
-    const customWrap = document.createElement("div");
-    customWrap.className = "mh-life-childhood-custom-wrap";
-    const customLab = document.createElement("label");
-    customLab.className = "mh-life-row";
-    customLab.appendChild(document.createTextNode("Укажите врача (как в тексте документа, родительный падеж): "));
-    const customInp = document.createElement("input");
-    customInp.type = "text";
-    customInp.className = "mh-life-text mh-life-ch-visit-custom";
-    customInp.placeholder = "например: ортопеда, логопеда";
-    customInp.value = String(v.customOther ?? "");
-    customLab.appendChild(customInp);
-    customWrap.appendChild(customLab);
-    customWrap.hidden = v.specialist !== "custom";
-    row.appendChild(customWrap);
-
-    specSel.addEventListener("change", () => {
-      customWrap.hidden = specSel.value !== "custom";
-      if (specSel.value !== "custom" && customInp instanceof HTMLInputElement) customInp.value = "";
-    });
-
-    const reasonRow = document.createElement("div");
-    reasonRow.className = "mh-life-childhood-reason-row";
-    const reasonLab = document.createElement("label");
-    reasonLab.appendChild(document.createTextNode("По какой причине: "));
-    const reasonInp = document.createElement("input");
-    reasonInp.type = "text";
-    reasonInp.className = "mh-life-text mh-life-ch-visit-reason";
-    reasonInp.disabled = Boolean(v.reasonUnknown);
-    reasonInp.value = v.reasonUnknown ? "" : String(v.reason ?? "");
-    reasonLab.appendChild(reasonInp);
-    reasonRow.appendChild(reasonLab);
-    row.appendChild(reasonRow);
-
-    const unLab = document.createElement("label");
-    unLab.className = "mh-life-check mh-life-early-unknown-lab";
-    const unCb = document.createElement("input");
-    unCb.type = "checkbox";
-    unCb.className = "mh-life-ch-visit-reason-unknown";
-    unCb.checked = Boolean(v.reasonUnknown);
-    unLab.appendChild(unCb);
-    unLab.appendChild(document.createTextNode(" Не знаю причину"));
-    row.appendChild(unLab);
-
-    unCb.addEventListener("change", () => {
-      reasonInp.disabled = unCb.checked;
-      if (unCb.checked) reasonInp.value = "";
-    });
-
-    const actions = document.createElement("div");
-    actions.className = "mh-life-childhood-visit-actions";
-    const delBtn = document.createElement("button");
-    delBtn.type = "button";
-    delBtn.className = "mh-life-heredity-remove";
-    delBtn.textContent = "Удалить";
-    delBtn.hidden = total <= 1;
-    delBtn.addEventListener("click", () => {
+  const fsChList = fieldset("Добавленные специалисты");
+  const chListIntro = document.createElement("p");
+  chListIntro.className = "mh-life-hint";
+  if (childhoodDraftClosed) {
+    chListIntro.textContent =
+      chCases.length > 0
+        ? "Перечисление завершено. Нажмите «Добавить ещё одного специалиста», если нужно указать ещё одного."
+        : "Перечисление завершено. Можно добавить специалиста кнопкой ниже или оставить список пустым.";
+  } else if (chCases.length) {
+    chListIntro.textContent = "Ниже — форма для следующего специалиста. Уже добавленные остаются в списке.";
+  } else {
+    chListIntro.textContent =
+      "Заполните форму ниже и нажмите «Сохранить и добавить ещё одного» или «Сохранить и закончить».";
+  }
+  fsChList.appendChild(chListIntro);
+  const chUl = document.createElement("ul");
+  chUl.className = "mh-life-heredity-list";
+  chCases.forEach((v, idx) => {
+    const li = document.createElement("li");
+    li.className = "mh-life-heredity-item";
+    const span = document.createElement("span");
+    span.textContent = summarizeChildhoodVisitForUi(v);
+    li.appendChild(span);
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "mh-life-heredity-remove";
+    del.textContent = "Удалить";
+    del.addEventListener("click", () => {
       reflowChildhood((st) => {
         const arr = normalizeChildhoodVisits(st.childhoodVisits);
         arr.splice(idx, 1);
-        st.childhoodVisits = arr.length ? arr : [{ specialist: "neuro", customOther: "", reason: "", reasonUnknown: false }];
+        st.childhoodVisits = arr;
       });
     });
-    actions.appendChild(delBtn);
-    row.appendChild(actions);
-
-    visitsList.appendChild(row);
-  }
-
-  visitStates.forEach((v, idx) => appendChildhoodVisitRow(v, idx, visitStates.length));
-
-  chYesWrap.appendChild(visitsList);
-
-  const addChBtn = document.createElement("button");
-  addChBtn.type = "button";
-  addChBtn.className = "mh-life-add-case";
-  addChBtn.textContent = "Добавить специалиста";
-  addChBtn.addEventListener("click", () => {
-    reflowChildhood((st) => {
-      const arr = normalizeChildhoodVisits(st.childhoodVisits);
-      arr.push({ specialist: "neuro", customOther: "", reason: "", reasonUnknown: false });
-      st.childhoodVisits = arr;
-      st.childhoodVisitsCloseDraft = false;
-    });
+    li.appendChild(del);
+    chUl.appendChild(li);
   });
-  const chActions = document.createElement("div");
-  chActions.className = "mh-life-heredity-actions";
-  chActions.appendChild(addChBtn);
-  const btnFinishChildhood = document.createElement("button");
-  btnFinishChildhood.type = "button";
-  btnFinishChildhood.className = "mh-life-heredity-icon-btn mh-life-heredity-icon-btn--ok";
-  btnFinishChildhood.textContent = "✓";
-  btnFinishChildhood.setAttribute("aria-label", "Завершить ввод специалистов");
-  btnFinishChildhood.title = "Завершить ввод специалистов";
-  btnFinishChildhood.addEventListener("click", () => {
-    reflowChildhood((st) => {
-      const arr = normalizeChildhoodVisits(readChildhoodVisitsFromDom(contentEl)).filter((v) => {
-        if (v.specialist === "custom" && !String(v.customOther ?? "").trim()) return false;
-        if (v.reasonUnknown) return true;
-        return Boolean(String(v.reason ?? "").trim());
-      });
-      st.childhoodVisits = arr;
-      st.childhoodVisitsCloseDraft = true;
-    });
-  });
-  chActions.appendChild(btnFinishChildhood);
-  const btnCancelChildhood = document.createElement("button");
-  btnCancelChildhood.type = "button";
-  btnCancelChildhood.className = "mh-life-heredity-icon-btn mh-life-heredity-icon-btn--clear";
-  btnCancelChildhood.textContent = "✗";
-  btnCancelChildhood.setAttribute("aria-label", "Отменить и очистить список специалистов");
-  btnCancelChildhood.title = "Отменить и очистить список специалистов";
-  btnCancelChildhood.addEventListener("click", () => {
-    reflowChildhood((st) => {
-      st.childhoodVisits = [{ specialist: "neuro", customOther: "", reason: "", reasonUnknown: false }];
-      st.childhoodVisitsCloseDraft = false;
-    });
-  });
-  addChBtn.hidden = childhoodDraftClosed;
-  btnFinishChildhood.hidden = childhoodDraftClosed;
-  btnCancelChildhood.hidden = childhoodDraftClosed;
+  fsChList.appendChild(chUl);
+  chListPanel.appendChild(fsChList);
+
+  const chCasesJson = document.createElement("textarea");
+  chCasesJson.id = "mh-life-childhood-visits-json";
+  chCasesJson.hidden = true;
+  chCasesJson.setAttribute("aria-hidden", "true");
+  chCasesJson.textContent = JSON.stringify(chCases);
+  chListPanel.appendChild(chCasesJson);
+
+  const chListActions = document.createElement("div");
+  chListActions.className = "mh-life-heredity-list-actions";
   const btnReopenChildhood = document.createElement("button");
   btnReopenChildhood.type = "button";
-  btnReopenChildhood.className = "mh-life-add-case";
-  btnReopenChildhood.textContent = "Добавить ещё";
+  btnReopenChildhood.className = "mh-life-btn mh-life-btn--secondary";
+  btnReopenChildhood.textContent = "Добавить ещё одного специалиста";
   btnReopenChildhood.hidden = !childhoodDraftClosed;
   btnReopenChildhood.addEventListener("click", () => {
     reflowChildhood((st) => {
       st.childhoodVisitsCloseDraft = false;
-      const arr = normalizeChildhoodVisits(st.childhoodVisits);
-      st.childhoodVisits = arr.length ? arr : [{ specialist: "neuro", customOther: "", reason: "", reasonUnknown: false }];
     });
   });
-  chActions.appendChild(btnReopenChildhood);
-  chActions.appendChild(btnCancelChildhood);
-  chYesWrap.appendChild(chActions);
+  chListActions.appendChild(btnReopenChildhood);
+  chListPanel.appendChild(chListActions);
+  chYesWrap.appendChild(chListPanel);
+
+  const chDraftBlock = document.createElement("div");
+  chDraftBlock.id = "mh-life-childhood-draft-block";
+  chDraftBlock.className = "mh-life-yes-block";
+  chDraftBlock.hidden = childhoodDraftClosed;
+
+  const chDraftWrap = document.createElement("div");
+  chDraftWrap.className = "mh-life-heredity-draft-wrap";
+  const chDraftTitle = document.createElement("p");
+  chDraftTitle.className = "mh-life-heredity-draft-title";
+  chDraftTitle.textContent = "Следующий специалист";
+  chDraftWrap.appendChild(chDraftTitle);
+
+  const chSpecRow = document.createElement("div");
+  chSpecRow.className = "mh-life-row";
+  chSpecRow.appendChild(document.createTextNode("Врач: "));
+  const chSpecSel = document.createElement("select");
+  chSpecSel.id = "mh-life-ch-draft-specialist";
+  chSpecSel.className = "mh-life-select";
+  [
+    ["", "— выберите —"],
+    ["neuro", "Врач невролог"],
+    ["psych", "Врач психиатр"],
+    ["endo", "Врач эндокринолог"],
+    ["custom", "Свой вариант"],
+  ].forEach(([val, lab]) => {
+    const o = document.createElement("option");
+    o.value = val;
+    o.textContent = lab;
+    chSpecSel.appendChild(o);
+  });
+  chSpecRow.appendChild(chSpecSel);
+  chDraftWrap.appendChild(chSpecRow);
+
+  const chCustomWrap = document.createElement("div");
+  chCustomWrap.id = "mh-life-ch-draft-custom-wrap";
+  chCustomWrap.className = "mh-life-childhood-custom-wrap";
+  chCustomWrap.hidden = true;
+  const chCustomLab = document.createElement("label");
+  chCustomLab.className = "mh-life-row";
+  chCustomLab.appendChild(document.createTextNode("Укажите врача (родительный падеж): "));
+  const chCustomInp = document.createElement("input");
+  chCustomInp.type = "text";
+  chCustomInp.id = "mh-life-ch-draft-custom";
+  chCustomInp.className = "mh-life-text";
+  chCustomInp.placeholder = "например: ортопеда, логопеда";
+  chCustomLab.appendChild(chCustomInp);
+  chCustomWrap.appendChild(chCustomLab);
+  chDraftWrap.appendChild(chCustomWrap);
+
+  chSpecSel.addEventListener("change", () => {
+    chCustomWrap.hidden = chSpecSel.value !== "custom";
+    if (chSpecSel.value !== "custom") chCustomInp.value = "";
+  });
+
+  const chReasonRow = document.createElement("div");
+  chReasonRow.className = "mh-life-childhood-reason-row";
+  const chReasonLab = document.createElement("label");
+  chReasonLab.appendChild(document.createTextNode("По какой причине: "));
+  const chReasonInp = document.createElement("input");
+  chReasonInp.type = "text";
+  chReasonInp.id = "mh-life-ch-draft-reason";
+  chReasonInp.className = "mh-life-text";
+  chReasonLab.appendChild(chReasonInp);
+  chReasonRow.appendChild(chReasonLab);
+  chDraftWrap.appendChild(chReasonRow);
+
+  const chUnLab = document.createElement("label");
+  chUnLab.className = "mh-life-check mh-life-early-unknown-lab";
+  const chUnCb = document.createElement("input");
+  chUnCb.type = "checkbox";
+  chUnCb.id = "mh-life-ch-draft-reason-unknown";
+  chUnLab.appendChild(chUnCb);
+  chUnLab.appendChild(document.createTextNode(" Не знаю причину"));
+  chDraftWrap.appendChild(chUnLab);
+  chUnCb.addEventListener("change", () => {
+    chReasonInp.disabled = chUnCb.checked;
+    if (chUnCb.checked) chReasonInp.value = "";
+  });
+
+  const chAddRow = document.createElement("div");
+  chAddRow.className = "mh-life-heredity-actions";
+  const btnAddCh = document.createElement("button");
+  btnAddCh.type = "button";
+  btnAddCh.className = "mh-life-btn mh-life-btn--primary";
+  btnAddCh.textContent = "Сохранить и добавить ещё одного";
+  const btnFinishCh = document.createElement("button");
+  btnFinishCh.type = "button";
+  btnFinishCh.className = "mh-life-btn mh-life-btn--secondary";
+  btnFinishCh.textContent = "Сохранить и закончить";
+  const btnClearCh = document.createElement("button");
+  btnClearCh.type = "button";
+  btnClearCh.className = "mh-life-btn mh-life-btn--ghost";
+  btnClearCh.textContent = "Очистить форму";
+  chAddRow.appendChild(btnAddCh);
+  chAddRow.appendChild(btnFinishCh);
+  chAddRow.appendChild(btnClearCh);
+  chDraftWrap.appendChild(chAddRow);
+  chDraftBlock.appendChild(chDraftWrap);
+  chYesWrap.appendChild(chDraftBlock);
+
+  function resetChildhoodDraftForm() {
+    if (chSpecSel instanceof HTMLSelectElement) chSpecSel.value = "";
+    chCustomWrap.hidden = true;
+    chCustomInp.value = "";
+    chReasonInp.value = "";
+    chReasonInp.disabled = false;
+    chUnCb.checked = false;
+  }
+
+  /** @param {ChildhoodVisit} draft @returns {{ err: string | null; record: ChildhoodVisit | null }} */
+  function childhoodDraftToRecordOrError(draft) {
+    const err = validateChildhoodDraft(draft);
+    if (err) return { err, record: null };
+    return { err: null, record: { ...draft } };
+  }
+
+  btnClearCh.addEventListener("click", () => resetChildhoodDraftForm());
+
+  btnAddCh.addEventListener("click", () => {
+    readLifeStructuredFromDom(contentEl, answers);
+    const draft = readChildhoodDraftFromDom(chDraftBlock);
+    const { err, record } = childhoodDraftToRecordOrError(draft);
+    if (err || !record) {
+      window.alert(err || "Не удалось сохранить.");
+      return;
+    }
+    reflowChildhood((st) => {
+      if (!Array.isArray(st.childhoodVisits)) st.childhoodVisits = [];
+      st.childhoodVisits.push(record);
+      st.childhoodVisitsCloseDraft = false;
+    });
+  });
+
+  btnFinishCh.addEventListener("click", () => {
+    readLifeStructuredFromDom(contentEl, answers);
+    const draft = readChildhoodDraftFromDom(chDraftBlock);
+    const { err, record } = childhoodDraftToRecordOrError(draft);
+    if (err && !isChildhoodDraftEmpty(draft)) {
+      window.alert(err);
+      return;
+    }
+    reflowChildhood((st) => {
+      if (!Array.isArray(st.childhoodVisits)) st.childhoodVisits = [];
+      if (record) st.childhoodVisits.push(record);
+      st.childhoodVisitsCloseDraft = true;
+    });
+  });
 
   fsB3.appendChild(chYesWrap);
 
@@ -2422,22 +2548,13 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
     el.addEventListener("change", () => {
       const inp = contentEl.querySelector('input[name="mh-life-childhood"]:checked');
       const yes = inp instanceof HTMLInputElement && inp.value === "yes";
-      if (yes) {
-        if (state.childhoodVisitsCloseDraft === true) {
-          chYesWrap.hidden = false;
-          return;
-        }
-        const hasVisits = chYesWrap.querySelectorAll(".mh-life-childhood-visit").length > 0;
-        if (!hasVisits) {
-          reflowChildhood((st) => {
-            const arr = normalizeChildhoodVisits(st.childhoodVisits);
-            st.childhoodVisits = arr.length ? arr : [{ specialist: "neuro", customOther: "", reason: "", reasonUnknown: false }];
-            st.childhoodVisitsCloseDraft = false;
-          });
-          return;
-        }
-      }
       chYesWrap.hidden = !yes;
+      if (yes) {
+        reflowChildhood((st) => {
+          if (!Array.isArray(st.childhoodVisits)) st.childhoodVisits = [];
+          st.childhoodVisitsCloseDraft = false;
+        });
+      }
     });
   });
 
@@ -2549,14 +2666,18 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   const changeWrap = document.createElement("div");
   changeWrap.className = "mh-life-early-sub";
   changeWrap.hidden = state.schoolChanged !== "yes";
-  const q64 = document.createElement("p");
-  q64.className = "mh-life-edu-title";
-  q64.textContent = "Вопрос 4. Если была смена школы, укажите частоту и причину (можно несколько)";
-  changeWrap.appendChild(q64);
-  changeWrap.appendChild(radioRow("mh-life-school-change-freq", "once", "однократно", state.schoolChangeFrequency === "once"));
+  const freqTitle = document.createElement("p");
+  freqTitle.className = "mh-life-substep-title";
+  freqTitle.textContent = "Как часто меняли школу?";
+  changeWrap.appendChild(freqTitle);
+  changeWrap.appendChild(radioRow("mh-life-school-change-freq", "once", "Однократно", state.schoolChangeFrequency === "once"));
   changeWrap.appendChild(
-    radioRow("mh-life-school-change-freq", "many", "неоднократно", state.schoolChangeFrequency === "many")
+    radioRow("mh-life-school-change-freq", "many", "Неоднократно", state.schoolChangeFrequency === "many")
   );
+  const reasonsTitle = document.createElement("p");
+  reasonsTitle.className = "mh-life-substep-title";
+  reasonsTitle.textContent = "Причины смены школы (можно несколько):";
+  changeWrap.appendChild(reasonsTitle);
   changeWrap.appendChild(mkCheck("mh-life-school-change-move", "Переезд семьи", state.schoolChangeMove));
   changeWrap.appendChild(
     mkCheck("mh-life-school-change-conf-peers", "Конфликты с одноклассниками", state.schoolChangeConflictsPeers)
@@ -2754,8 +2875,13 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   const eduWrap = document.createElement("div");
   eduWrap.id = "mh-life-edu-wrap";
   eduWrap.hidden = eduAfterSchoolVal !== "yes";
-  eduWrap.appendChild(subEdu("Среднее профессиональное образование", "sec", state));
-  eduWrap.appendChild(subEdu("Высшее образование", "hi", state));
+  const eduHint = document.createElement("p");
+  eduHint.className = "mh-life-edu-hint";
+  eduHint.textContent =
+    "Укажите отдельно среднее профессиональное (колледж, техникум) и высшее (вуз, институт, академия). Для каждого — закончили или нет и специальность.";
+  eduWrap.appendChild(eduHint);
+  eduWrap.appendChild(subEdu("Среднее профессиональное образование (колледж, техникум)", "sec", state, gender));
+  eduWrap.appendChild(subEdu("Высшее образование (вуз, институт)", "hi", state, gender));
   fsB8.appendChild(eduWrap);
   fsB8.querySelectorAll('input[name="mh-life-edu-after-school"]').forEach((el) => {
     el.addEventListener("change", () => {
@@ -3555,7 +3681,7 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
       ["ct", "КТ"],
       ["mri", "МРТ"],
       ["no", "Нет"],
-      ["unknown", "Не помнит"],
+      ["unknown", "Не помню"],
     ].forEach(([v, t]) => {
       const o = document.createElement("option");
       o.value = v;
@@ -3630,8 +3756,13 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
       if (!isAge) epiAge.value = "";
     });
   });
-  epiWrap.appendChild(radioRow("mh-life-epi-meds", "yes", "Принимает противосудорожные препараты", state.epilepsyMedsStatus === "yes"));
-  epiWrap.appendChild(radioRow("mh-life-epi-meds", "no", "Лекарства не принимает", state.epilepsyMedsStatus === "no"));
+  epiWrap.appendChild(
+    radioRow("mh-life-epi-meds", "yes", "Принимаю противосудорожные препараты", state.epilepsyMedsStatus === "yes"),
+  );
+  epiWrap.appendChild(
+    radioRow("mh-life-epi-meds", "no", "Лекарства не принимаю", state.epilepsyMedsStatus === "no"),
+  );
+  epiWrap.appendChild(radioRow("mh-life-epi-meds", "unknown", "Не помню", state.epilepsyMedsStatus === "unknown"));
   const medsWrap = document.createElement("div");
   medsWrap.className = "mh-life-early-sub";
   medsWrap.hidden = state.epilepsyMedsStatus !== "yes";
@@ -3680,8 +3811,13 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   chDis.placeholder = "Какие заболевания";
   chDis.value = String(state.chronicDiseasesText ?? "");
   chWrap.appendChild(chDis);
-  chWrap.appendChild(radioRow("mh-life-chronic-meds", "yes", "Да, принимает лекарства регулярно", state.chronicMedsRegular === "yes"));
-  chWrap.appendChild(radioRow("mh-life-chronic-meds", "no", "Нет, регулярно не принимает", state.chronicMedsRegular === "no"));
+  chWrap.appendChild(
+    radioRow("mh-life-chronic-meds", "yes", "Принимаю лекарства регулярно", state.chronicMedsRegular === "yes"),
+  );
+  chWrap.appendChild(
+    radioRow("mh-life-chronic-meds", "no", "Лекарства не принимаю регулярно", state.chronicMedsRegular === "no"),
+  );
+  chWrap.appendChild(radioRow("mh-life-chronic-meds", "unknown", "Не помню", state.chronicMedsRegular === "unknown"));
   const chMeds = document.createElement("input");
   chMeds.type = "text";
   chMeds.id = "mh-life-chronic-meds-text";
@@ -4219,6 +4355,7 @@ export function renderLifeStructuredStep(contentEl, answers, qIndex, stepsLen, g
   syncHeredityDraftUi();
 
   if (nextWizardBtn) nextWizardBtn.textContent = qIndex >= stepsLen - 1 ? "Завершить" : "Далее";
+  if (isItogMode()) enhanceItogLifeStep(contentEl);
 }
 
 function mkCheck(id, label, checked) {
@@ -4233,11 +4370,32 @@ function mkCheck(id, label, checked) {
   return lab;
 }
 
-function subEdu(title, prefix, state) {
+/** @param {"male" | "female" | null} gender */
+function uiEduNoneLabel(gender) {
+  if (gender === "female") return "Не получала";
+  if (gender === "male") return "Не получал";
+  return "Не получал(а)";
+}
+
+/** @param {"male" | "female" | null} gender */
+function uiEduDoneLabel(gender) {
+  if (gender === "female") return "Закончила";
+  if (gender === "male") return "Закончил";
+  return "Закончил(а)";
+}
+
+/** @param {"male" | "female" | null} gender */
+function uiEduUndoneLabel(gender) {
+  if (gender === "female") return "Не закончила";
+  if (gender === "male") return "Не закончил";
+  return "Не закончил(а)";
+}
+
+function subEdu(title, prefix, state, gender) {
   const div = document.createElement("div");
   div.className = "mh-life-edu-block";
   const p = document.createElement("p");
-  p.className = "mh-life-edu-title";
+  p.className = "mh-life-edu-section-title";
   p.textContent = title;
   div.appendChild(p);
   const done = prefix === "sec" ? state.eduSecDone : state.eduHiDone;
@@ -4245,9 +4403,9 @@ function subEdu(title, prefix, state) {
   const none = prefix === "sec" ? state.eduSecNone : state.eduHiNone;
   const spec = prefix === "sec" ? state.eduSecSpec : state.eduHiSpec;
   const name = `mh-life-edu-${prefix}`;
-  div.appendChild(radioRowStatic(name, "none", "Не получал", none));
-  div.appendChild(radioRowStatic(name, "done", "Законченное", done));
-  div.appendChild(radioRowStatic(name, "undone", "Незаконченное", undone));
+  div.appendChild(radioRowStatic(name, "none", uiEduNoneLabel(gender), none));
+  div.appendChild(radioRowStatic(name, "done", uiEduDoneLabel(gender), done));
+  div.appendChild(radioRowStatic(name, "undone", uiEduUndoneLabel(gender), undone));
   const sp = document.createElement("input");
   sp.type = "text";
   sp.className = "mh-life-text";
@@ -4273,27 +4431,14 @@ function radioRowStatic(name, value, label, checked) {
 
 /** @param {HTMLElement} root @returns {ChildhoodVisit[]} */
 function readChildhoodVisitsFromDom(root) {
-  const out = /** @type {ChildhoodVisit[]} */ ([]);
-  const visitsRoot = root.querySelector("#mh-life-childhood-visits-list");
-  if (!(visitsRoot instanceof HTMLElement)) return out;
-  visitsRoot.querySelectorAll(".mh-life-childhood-visit").forEach((visitRow) => {
-    const specSel = visitRow.querySelector(".mh-life-ch-visit-specialist");
-    const specialist =
-      specSel instanceof HTMLSelectElement && CHILDHOOD_SPECIALIST_CODES.has(specSel.value) ? specSel.value : "neuro";
-    const customInp = visitRow.querySelector(".mh-life-ch-visit-custom");
-    const customOther = customInp instanceof HTMLInputElement ? customInp.value.trim() : "";
-    const reasonInp = visitRow.querySelector(".mh-life-ch-visit-reason");
-    const reason = reasonInp instanceof HTMLInputElement ? reasonInp.value.trim() : "";
-    const un = visitRow.querySelector(".mh-life-ch-visit-reason-unknown");
-    const reasonUnknown = un instanceof HTMLInputElement && un.checked;
-    out.push({
-      specialist,
-      customOther: specialist === "custom" ? customOther : "",
-      reason: reasonUnknown ? "" : reason,
-      reasonUnknown,
-    });
-  });
-  return out;
+  const ta = root.querySelector("#mh-life-childhood-visits-json");
+  if (!(ta instanceof HTMLTextAreaElement)) return [];
+  try {
+    const parsed = JSON.parse(ta.value || "[]");
+    return normalizeChildhoodVisits(parsed);
+  } catch {
+    return [];
+  }
 }
 
 /**

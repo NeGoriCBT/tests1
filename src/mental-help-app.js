@@ -27,12 +27,19 @@ import { formatPatientGenderRu, getSelectedPatientGender } from "./patient-gende
 import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
 import { initSpecialistModal } from "./specialist-modal.js";
+import {
+  enhanceItogComplaintsStep,
+  isItogMode,
+  mountItogCategoryNav,
+  updateItogCategoryNav,
+} from "./mental-help-itog-ui.js";
 
 /**
  * @param {{
  *   wordFileBase?: string;
  *   wordSubtitle?: string | null;
  *   steps?: typeof MH_STEPS_DEFAULT;
+ *   variant?: "itog";
  *   lifeWordPreviewRoot?: HTMLElement | null;
  *   diseaseWordPreviewRoot?: HTMLElement | null;
  *   unifiedWordPreviewRoot?: HTMLElement | null;
@@ -43,6 +50,7 @@ export function initMentalHelpApp(opts = {}) {
   const wordFileBase = opts.wordFileBase ?? "MentalHelp_anketa";
   const wordSubtitle = opts.wordSubtitle ?? null;
   const steps = opts.steps ?? MH_STEPS_DEFAULT;
+  const variantItog = opts.variant === "itog" || isItogMode();
   const lifeWordPreviewRoot = opts.lifeWordPreviewRoot ?? null;
   const diseaseWordPreviewRoot = opts.diseaseWordPreviewRoot ?? null;
   const unifiedWordPreviewRoot = opts.unifiedWordPreviewRoot ?? null;
@@ -265,6 +273,18 @@ function renderComplaintsStep() {
     bt.textContent = block.title;
     section.appendChild(bt);
 
+    // В «итог» пояснение показывается на карточке (enhanceItogComplaintsStep), не дублируем здесь.
+    if (!isItogMode()) {
+      const blockPrompt = document.createElement("p");
+      blockPrompt.className = "mh-complaints-block-prompt";
+      const label = document.createElement("span");
+      label.className = "mh-instruction-label";
+      label.textContent = "Инструкция. ";
+      blockPrompt.appendChild(label);
+      blockPrompt.appendChild(document.createTextNode(block.instruction));
+      section.appendChild(blockPrompt);
+    }
+
     const row = state[block.id] ?? { selected: [], custom: "" };
     const grid = document.createElement("div");
     grid.className = "mh-complaints-options";
@@ -289,13 +309,13 @@ function renderComplaintsStep() {
     const customLab = document.createElement("label");
     customLab.className = "mh-complaints-custom-label";
     customLab.htmlFor = `mh-custom-${block.id}`;
-    customLab.textContent = "Свой вариант";
+    customLab.textContent = "Свой вариант (если нужного пункта нет в списке)";
     const customInp = document.createElement("input");
     customInp.type = "text";
     customInp.className = "mh-complaints-custom";
     customInp.id = `mh-custom-${block.id}`;
     customInp.value = row.custom;
-    customInp.placeholder = "Необязательно";
+    customInp.placeholder = "Опишите своими словами — необязательно";
     customInp.autocomplete = "off";
     customWrap.appendChild(customLab);
     customWrap.appendChild(customInp);
@@ -345,10 +365,13 @@ function renderComplaintsStep() {
   testWrap.appendChild(testOut);
   contentEl.appendChild(testWrap);
 
+  if (variantItog) enhanceItogComplaintsStep(contentEl);
+
   nextWizardBtn.textContent = qIndex >= steps.length - 1 ? "Завершить" : "Далее";
   syncLifeWordPreview();
   syncDiseaseWordPreview();
   syncUnifiedWordPreview();
+  if (variantItog) updateItogCategoryNav(steps, qIndex);
 }
 
 function renderWizardStep() {
@@ -367,10 +390,12 @@ function renderWizardStep() {
       steps.length,
       getSelectedPatientGender(),
       nextWizardBtn,
+      step.blockLead ?? null,
     );
     syncLifeWordPreview();
     syncDiseaseWordPreview();
     syncUnifiedWordPreview();
+    if (variantItog) updateItogCategoryNav(steps, qIndex);
     return;
   }
   if (step.id === DISEASE_STRUCTURED_ID) {
@@ -381,10 +406,12 @@ function renderWizardStep() {
       steps.length,
       getSelectedPatientGender(),
       nextWizardBtn,
+      step.blockLead ?? null,
     );
     syncDiseaseWordPreview();
     syncLifeWordPreview();
     syncUnifiedWordPreview();
+    if (variantItog) updateItogCategoryNav(steps, qIndex);
     return;
   }
 
@@ -456,6 +483,7 @@ function goWizard(index) {
   qIndex = Math.max(0, Math.min(steps.length - 1, index));
   hideAllSteps();
   show(wizardEl, true);
+  if (variantItog) mountItogCategoryNav(/** @type {HTMLElement} */ (wizardEl));
   renderWizardStep();
 }
 
