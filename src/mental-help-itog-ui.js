@@ -76,6 +76,47 @@ function createItogCard(title, opts = {}) {
   return { card, body };
 }
 
+/** @param {HTMLElement} pop */
+function resetHelpPopPosition(pop) {
+  pop.classList.remove("mh-itog-help__pop--fixed");
+  pop.style.removeProperty("top");
+  pop.style.removeProperty("left");
+  pop.style.removeProperty("width");
+  pop.style.removeProperty("max-width");
+}
+
+/**
+ * @param {HTMLButtonElement} btn
+ * @param {HTMLElement} pop
+ */
+function positionHelpPop(btn, pop) {
+  const margin = 16;
+  const gap = 6;
+  const maxW = Math.min(288, window.innerWidth - margin * 2);
+
+  pop.classList.add("mh-itog-help__pop--fixed");
+  pop.style.width = `${maxW}px`;
+  pop.style.maxWidth = `${maxW}px`;
+
+  const btnRect = btn.getBoundingClientRect();
+  const popW = pop.offsetWidth || maxW;
+  const popH = pop.offsetHeight;
+
+  let left = btnRect.right - popW;
+  if (left < margin) left = margin;
+  if (left + popW > window.innerWidth - margin) {
+    left = window.innerWidth - margin - popW;
+  }
+
+  let top = btnRect.bottom + gap;
+  if (top + popH > window.innerHeight - margin) {
+    top = Math.max(margin, btnRect.top - gap - popH);
+  }
+
+  pop.style.left = `${Math.round(left)}px`;
+  pop.style.top = `${Math.round(top)}px`;
+}
+
 /**
  * @param {string} helpText
  */
@@ -100,6 +141,7 @@ function createHelpButton(helpText) {
     const open = !pop.hidden;
     document.querySelectorAll(".mh-itog-help__pop").forEach((p) => {
       p.hidden = true;
+      resetHelpPopPosition(/** @type {HTMLElement} */ (p));
     });
     document.querySelectorAll(".mh-itog-help__btn[aria-expanded='true']").forEach((b) => {
       b.setAttribute("aria-expanded", "false");
@@ -107,6 +149,7 @@ function createHelpButton(helpText) {
     if (!open) {
       pop.hidden = false;
       btn.setAttribute("aria-expanded", "true");
+      requestAnimationFrame(() => positionHelpPop(btn, pop));
     }
   });
 
@@ -122,6 +165,7 @@ function closeHelpOnOutsideClick(root) {
   document.addEventListener("click", () => {
     root.querySelectorAll(".mh-itog-help__pop").forEach((p) => {
       p.hidden = true;
+      resetHelpPopPosition(/** @type {HTMLElement} */ (p));
     });
     root.querySelectorAll(".mh-itog-help__btn[aria-expanded='true']").forEach((b) => {
       b.setAttribute("aria-expanded", "false");
@@ -131,9 +175,21 @@ function closeHelpOnOutsideClick(root) {
     if (e.key === "Escape") {
       root.querySelectorAll(".mh-itog-help__pop").forEach((p) => {
         p.hidden = true;
+        resetHelpPopPosition(/** @type {HTMLElement} */ (p));
       });
     }
   });
+  window.addEventListener(
+    "resize",
+    () => {
+      const openBtn = root.querySelector(".mh-itog-help__btn[aria-expanded='true']");
+      const openPop = root.querySelector(".mh-itog-help__pop:not([hidden])");
+      if (openBtn instanceof HTMLButtonElement && openPop instanceof HTMLElement) {
+        positionHelpPop(openBtn, openPop);
+      }
+    },
+    { passive: true },
+  );
 }
 
 /** @param {string} title */

@@ -326,7 +326,10 @@
   z-index: 40;
   top: calc(100% + 0.35rem);
   right: 0;
+  left: auto;
   width: min(18rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  box-sizing: border-box;
   padding: 0.65rem 0.75rem;
   font-size: 0.82rem;
   font-weight: 400;
@@ -336,6 +339,12 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: 0 4px 16px color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.mh-itog-help__pop--fixed {
+  position: fixed;
+  top: auto;
+  right: auto;
 }
 
 .mh-itog-help__pop:not([hidden]) {
@@ -357,10 +366,5 @@
 @media (max-width: 520px) {
   .mh-itog-cat {
     min-width: 100%;
-  }
-
-  .mh-itog-help__pop {
-    right: auto;
-    left: 0;
   }
 }
