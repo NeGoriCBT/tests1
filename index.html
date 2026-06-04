@@ -10,8 +10,9 @@
     <link rel="stylesheet" href="./src/styles/specialist-modal.css" />
     <link rel="stylesheet" href="./src/styles/mental-help.css" />
     <link rel="stylesheet" href="./src/styles/mental-help-itog.css" />
+    <link rel="stylesheet" href="./src/styles/mental-help-branding.css" />
   </head>
-  <body>
+  <body class="mh-branded">
     <script>
       (function () {
         function redirectIfSourceOnly() {
@@ -30,6 +31,19 @@
     <noscript>
       <div class="noscript-banner">Для работы анкеты включите JavaScript в настройках браузера.</div>
     </noscript>
+    <header class="mh-page-brand" aria-label="Mental Help">
+      <img
+        class="mh-brand-logo"
+        src="./assets/logo.png"
+        alt="Mental Help"
+        width="132"
+        height="62"
+        decoding="async"
+      />
+    </header>
+    <div class="mh-brand-deco" aria-hidden="true">
+      <img src="./assets/brand-deco.png" alt="" width="144" height="154" decoding="async" />
+    </div>
     <div class="layout layout--wide layout--itog">
       <div class="mh-shell mh-shell--itog">
         <section id="mh-step-welcome" class="instruction mh-step">
@@ -59,7 +73,7 @@
           <h2 class="mh-block-title">Выбор врача</h2>
           <p>Укажите врача — он будет указан в шапке документа Word.</p>
           <div class="specialist-bar" id="specialist-bar" style="margin-top: 1rem">
-            <p class="specialist-bar__title">ВЫБЕРИТЕ ВРАЧА</p>
+            <p class="specialist-bar__title">Выберите врача</p>
             <div class="specialist-bar__row">
               <button
                 type="button"
@@ -138,11 +152,11 @@
           </div>
         </section>
       </div>
-
-      <footer class="footer footer--disclaimer">
-        Данные не сохраняются на сервере. Анкета не заменяет очную консультацию специалиста.
-      </footer>
     </div>
+
+    <footer class="footer footer--disclaimer mh-site-footer">
+      Данные не сохраняются на сервере. Анкета не заменяет очную консультацию специалиста.
+    </footer>
 
     <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
       <div class="specialist-modal__backdrop" aria-hidden="true"></div>

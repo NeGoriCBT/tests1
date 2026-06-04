@@ -26,6 +26,7 @@ import {
 import { formatPatientGenderRu, getSelectedPatientGender } from "./patient-gender.js";
 import { getSelectedSpecialistName } from "./specialists.js";
 import { buildWordReportHeader } from "./word-report-header.js";
+import { buildWordLogoBlock, fetchBrandLogoData } from "./word-branding.js";
 import { initSpecialistModal } from "./specialist-modal.js";
 import {
   enhanceItogComplaintsStep,
@@ -563,11 +564,13 @@ document.getElementById("btn-download")?.addEventListener("click", async () => {
     return;
   }
   persistAllAnswersForWord();
-  const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await import("docx");
+  const { Document, Packer, Paragraph, TextRun, ImageRun, HeadingLevel } = await import("docx");
   const dateStr = new Date().toLocaleString("ru-RU");
   const bodies = buildWordBlockBody(answers, genderVal, steps);
+  const logoData = await fetchBrandLogoData();
 
   const children = [
+    ...buildWordLogoBlock(Paragraph, ImageRun, logoData),
     ...buildWordReportHeader(Paragraph, TextRun, {
       dateStr,
       specialistName: doctorName,

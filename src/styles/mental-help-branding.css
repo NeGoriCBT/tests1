@@ -1,0 +1,202 @@
+/* Фон и логотип Mental Help */
+
+body.mh-branded {
+  background: #fff;
+  --mh-section: #a3c6d0;
+  --mh-section-border: #8eb5c1;
+  --mh-section-active: #8ab0bc;
+  --btn-fill: #a2c4cd;
+  --btn-fill-hover: #8eb5c1;
+  --btn-border: #6d949f;
+}
+
+/* Все кнопки — видимая граница */
+.mh-branded button,
+.mh-branded .btn,
+.mh-branded .mh-life-btn {
+  border: 1px solid var(--btn-border);
+  box-sizing: border-box;
+}
+
+/* Основные кнопки — голубые, чёрный текст */
+.mh-branded .btn--primary,
+.mh-branded .mh-life-btn--primary,
+.mh-branded .specialist-modal__close.btn--primary {
+  background: var(--btn-fill);
+  border-color: var(--btn-border);
+  color: var(--text);
+}
+
+.mh-branded .btn--primary:hover,
+.mh-branded .mh-life-btn--primary:hover,
+.mh-branded .specialist-modal__close.btn--primary:hover {
+  background: var(--btn-fill-hover);
+  border-color: #5a858f;
+  color: var(--text);
+}
+
+.mh-branded .btn--ghost,
+.mh-branded .mh-life-btn--ghost {
+  background: #fff;
+  border-color: var(--btn-border);
+  color: var(--text);
+}
+
+.mh-branded .btn--ghost:hover,
+.mh-branded .mh-life-btn--ghost:hover {
+  background: var(--btn-fill-hover);
+  border-color: var(--btn-border);
+  color: var(--text);
+}
+
+.mh-branded .mh-life-btn--secondary {
+  background: var(--mh-section);
+  border-color: var(--btn-border);
+  color: var(--text);
+}
+
+.mh-branded .mh-life-heredity-remove {
+  padding: 0.2rem 0.45rem;
+  font: inherit;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid var(--btn-border);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Блок «Выберите врача» — без цветной подложки */
+.mh-branded .specialist-bar {
+  margin-bottom: 1rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.mh-branded .specialist-bar__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  color: var(--text);
+}
+
+/* Разделы анкеты — 1 / 2 / 3 */
+.mh-branded .mh-itog-categories {
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.mh-branded .mh-itog-cat {
+  color: var(--text);
+  background: var(--mh-section);
+  border: 1px solid var(--btn-border);
+}
+
+.mh-branded .mh-itog-cat--active {
+  color: var(--text);
+  background: var(--mh-section-active);
+  border: 1px solid #5a858f;
+}
+
+.mh-branded .mh-dis-episode-nav__chip {
+  border: 1px solid var(--btn-border);
+  color: var(--text);
+  background: #fff;
+}
+
+.mh-branded .mh-dis-episode-nav__chip--active {
+  background: var(--mh-section);
+  border-color: var(--btn-border);
+  color: var(--text);
+}
+
+.mh-branded .mh-itog-help__btn {
+  border: 1px solid var(--btn-border);
+  background: #fff;
+}
+
+.mh-branded .mh-itog-cat__num {
+  opacity: 0.85;
+}
+
+/* Декоративная картинка — правый нижний угол, крупнее и полупрозрачная */
+.mh-brand-deco {
+  position: fixed;
+  right: max(0.5rem, env(safe-area-inset-right, 0px));
+  bottom: max(3.75rem, calc(env(safe-area-inset-bottom, 0px) + 3.25rem));
+  z-index: 0;
+  width: min(17rem, 48vw);
+  max-width: 272px;
+  pointer-events: none;
+  line-height: 0;
+}
+
+.mh-brand-deco img {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0.36;
+}
+
+/* Пометка — внизу экрана */
+.mh-site-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 0.6rem 1.25rem;
+  padding-bottom: max(0.6rem, env(safe-area-inset-bottom, 0px));
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--muted);
+  background: rgb(255 255 255 / 0.94);
+  border-top: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.mh-page-brand {
+  position: relative;
+  z-index: 2;
+  max-width: min(96vw, 1500px);
+  margin: 0 auto;
+  padding: 1rem 1.25rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.mh-brand-logo {
+  display: block;
+  width: clamp(100px, 22vw, 132px);
+  height: auto;
+}
+
+.layout--itog {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 4.5rem;
+}
+
+@media (max-width: 520px) {
+  .mh-page-brand {
+    padding: 0.75rem 1rem 0.35rem;
+  }
+
+  .mh-brand-deco {
+    width: min(13.5rem, 56vw);
+    max-width: 220px;
+    bottom: max(4.25rem, calc(env(safe-area-inset-bottom, 0px) + 3.5rem));
+  }
+
+  .mh-brand-deco img {
+    opacity: 0.32;
+  }
+
+  .layout--itog {
+    padding-bottom: 5rem;
+  }
+}
