@@ -2,9 +2,11 @@
 
 export const SPECIALISTS = [
   { id: "gavryushin", name: "Гаврюшин К.А." },
-  { id: "guliev", name: "Гулиев М. А." },
-  { id: "sirazetdinov", name: "Сиразетдинов Р. Р." },
-  { id: "sharafutdinov", name: "Шарафутдинов А. Р." },
+  { id: "afzaletdinova", name: "Афзалетдинова Д.Х." },
+  { id: "guliev", name: "Гулиев М.А." },
+  { id: "sirazetdinov", name: "Сиразетдинов Р.Р." },
+  { id: "umetbaeva", name: "Уметбаева А.Г." },
+  { id: "sharafutdinov", name: "Шарафутдинов А.Р." },
 ];
 
 const STORAGE_KEY = "psychTestSpecialistId";

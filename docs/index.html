@@ -4,10 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
-    <title>Психологические тесты</title>
-    <script type="module" crossorigin src="./assets/main-tWh6Ksvm.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/global-B_Jj1ot9.js">
-    <link rel="stylesheet" crossorigin href="./assets/global-FsqcezuS.css">
+    <title>Полная анкета · Mental Help</title>
+    <script type="module" crossorigin src="./assets/main-DIXAmI9Y.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/main-oREpkLBk.css">
   </head>
   <body>
     <script>
@@ -26,109 +25,136 @@
       })();
     </script>
     <noscript>
-      <div class="noscript-banner">
-        Для работы сайта включите JavaScript в настройках браузера.
-      </div>
+      <div class="noscript-banner">Для работы анкеты включите JavaScript в настройках браузера.</div>
     </noscript>
-    <div class="layout">
-      <header class="header">
-        <h1>Психологические тесты</h1>
-        <p class="lead">Выберите опросник для самооценки. Результаты можно сохранить в документ Word.</p>
-        <p class="disclaimer">
-          <strong>Важно.</strong> Тест не ставит диагноз и не является основанием для самолечения. Результаты носят
-          информационный характер и не заменяют очную консультацию врача или психолога.
-        </p>
-        <p class="privacy-note">
-          <strong>Конфиденциальность.</strong> Ответы и личные данные никуда не отправляются и не сохраняются на сервере:
-          расчёт выполняется только в вашем браузере. Файл Word при скачивании создаётся у вас на устройстве. После
-          закрытия страницы введённые ответы в браузере не хранятся.
-        </p>
-      </header>
-      <main>
-        <div class="test-search">
-          <label class="test-search__label" for="test-search-input">Поиск по названию</label>
-          <input
-            class="test-search__input"
-            type="search"
-            id="test-search-input"
-            placeholder="Например: депрессия, SCL-90, симптоматика…"
-            autocomplete="off"
-            spellcheck="false"
-          />
-        </div>
-        <p class="test-search__empty" id="test-search-empty" hidden>Ничего не найдено. Попробуйте другой запрос.</p>
-        <ul class="test-list" id="test-list">
-          <li>
-            <a class="test-card" href="./mental-help.html">
-              <span class="test-card__title">Анкета перед приёмом — Mental Help</span>
-              <span class="test-card__meta">анонимно · врач · Word</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./mental-help-v2.html">
-              <span class="test-card__title">Вторая версия анкеты — Mental Help</span>
-              <span class="test-card__meta">копия анкеты · врач · Word</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./mental-help-life-only.html">
-              <span class="test-card__title">Анамнез жизни — Mental Help</span>
-              <span class="test-card__meta">отдельно · предпросмотр Word</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./mental-help-disease.html">
-              <span class="test-card__title">Анамнез заболевания — Mental Help</span>
-              <span class="test-card__meta">структурированно · препараты · Word</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./mental-help-unified.html">
-              <span class="test-card__title">Полная анкета — Mental Help</span>
-              <span class="test-card__meta">жалобы · жизнь · болезнь · один Word</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./mental-help-unified-itog.html">
-              <span class="test-card__title">Полная анкета — итог</span>
-              <span class="test-card__meta">удобный интерфейс · подсказки · тот же Word</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./bdi.html">
-              <span class="test-card__title">Шкала депрессии Бека (BDI)</span>
-              <span class="test-card__meta">1–21 · сумма 0–62 · субшкалы</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./bai.html">
-              <span class="test-card__title">Шкала тревоги Бека (BAI)</span>
-              <span class="test-card__meta">1–21 · сумма 0–63</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./scl90.html">
-              <span class="test-card__title">SCL-90-R — опросник симптоматики</span>
-              <span class="test-card__meta">90 пунктов · 9 шкал · GSI, PSI, PDSI</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./fficd.html">
-              <span class="test-card__title">FFiCD — личностный опросник МКБ-11</span>
-              <span class="test-card__meta">121 пункт · 5 доменов · субдомены и нюансы</span>
-            </a>
-          </li>
-          <li>
-            <a class="test-card" href="./sifs.html">
-              <span class="test-card__title">SIFS — личностное и межличностное функционирование</span>
-              <span class="test-card__meta">24 пункта · 4 подшкалы · коэффициент тяжести</span>
-            </a>
-          </li>
-        </ul>
-      </main>
+    <div class="layout layout--wide layout--itog">
+      <div class="mh-shell mh-shell--itog">
+        <section id="mh-step-welcome" class="instruction mh-step">
+          <header class="header" style="margin-bottom: 1rem">
+            <h1>Полная анкета</h1>
+            <p class="lead">Жалобы · анамнез жизни · анамнез заболевания · документ Word</p>
+          </header>
+          <p>
+            Анкета перед приёмом: три раздела по шагам, подсказки к вопросам. Итоговый текст для врача формируется
+            автоматически и скачивается в Word.
+          </p>
+          <ol class="mh-benefits">
+            <li><strong>Жалобы</strong> — что беспокоит сейчас.</li>
+            <li><strong>Анамнез жизни</strong> — семья, развитие, школа, работа, здоровье.</li>
+            <li><strong>Анамнез заболевания</strong> — эпизоды, лечение, обращение в клинику.</li>
+          </ol>
+          <p class="privacy-note">
+            <strong>Важно.</strong> Анкета анонимна. Ответы не отправляются на сервер; файл Word создаётся только у вас
+            в браузере.
+          </p>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--primary" id="mh-btn-welcome-next">Начать</button>
+          </div>
+        </section>
+
+        <section id="mh-step-doctor" class="instruction mh-step" hidden>
+          <h2 class="mh-block-title">Выбор врача</h2>
+          <p>Укажите врача — он будет указан в шапке документа Word.</p>
+          <div class="specialist-bar" id="specialist-bar" style="margin-top: 1rem">
+            <p class="specialist-bar__title">ВЫБЕРИТЕ ВРАЧА</p>
+            <div class="specialist-bar__row">
+              <button
+                type="button"
+                class="btn btn--ghost"
+                id="btn-specialist"
+                aria-haspopup="dialog"
+                aria-controls="specialist-modal"
+              >
+                Врач
+              </button>
+              <span class="specialist-current" id="specialist-current">Не выбран</span>
+            </div>
+          </div>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--ghost" id="mh-btn-doctor-back">Назад</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-doctor-next">Далее</button>
+          </div>
+        </section>
+
+        <section id="mh-step-gender" class="instruction mh-step" hidden>
+          <h2 class="mh-block-title">Пол</h2>
+          <p>Нужен для грамотных формулировок в отчёте (обращался / обращалась и т.д.).</p>
+          <fieldset class="test-step-gender__fieldset">
+            <legend class="test-step-gender__legend">Пол</legend>
+            <div class="test-step-gender__options">
+              <label>
+                <input type="radio" name="patient-gender" value="male" />
+                <span>Мужской</span>
+              </label>
+              <label>
+                <input type="radio" name="patient-gender" value="female" />
+                <span>Женский</span>
+              </label>
+            </div>
+          </fieldset>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--ghost" id="mh-btn-gender-back">Назад</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-gender-next">Далее</button>
+          </div>
+        </section>
+
+        <section id="mh-step-wizard" class="instruction mh-step" hidden>
+          <nav class="mh-itog-categories" id="mh-itog-categories" aria-label="Разделы анкеты" hidden>
+            <button type="button" class="mh-itog-cat" data-cat="complaints" disabled>
+              <span class="mh-itog-cat__num">1</span>Жалобы
+            </button>
+            <button type="button" class="mh-itog-cat" data-cat="life" disabled>
+              <span class="mh-itog-cat__num">2</span>Анамнез жизни
+            </button>
+            <button type="button" class="mh-itog-cat" data-cat="disease" disabled>
+              <span class="mh-itog-cat__num">3</span>Анамнез болезни
+            </button>
+          </nav>
+          <p class="mh-progress" id="mh-progress" aria-live="polite"></p>
+          <div id="mh-wizard-content"></div>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap" hidden>
+            <h3 class="mh-word-life-preview__title">Предпросмотр текста для Word</h3>
+            <p class="mh-word-life-preview__hint">Все три раздела. Обновляется при заполнении полей.</p>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview"></pre>
+          </div>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--ghost" id="mh-btn-wizard-back">Назад</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-wizard-next">Далее</button>
+          </div>
+        </section>
+
+        <section class="results results--bai mh-step" id="results" hidden>
+          <h2>Готово</h2>
+          <p class="result-card__hint">Скачайте документ Word с заполненной анкетой.</p>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap-results">
+            <h3 class="mh-word-life-preview__title">Текст для Word</h3>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview-results"></pre>
+          </div>
+          <div class="results__actions">
+            <button type="button" class="btn btn--primary" id="btn-download">Скачать анкету (Word)</button>
+          </div>
+        </section>
+      </div>
+
       <footer class="footer footer--disclaimer">
-        Данные не сохраняются на сервере. Тест не ставит диагноз; результаты не заменяют консультацию специалиста.
+        Данные не сохраняются на сервере. Анкета не заменяет очную консультацию специалиста.
       </footer>
     </div>
+
+    <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
+      <div class="specialist-modal__backdrop" aria-hidden="true"></div>
+      <div
+        class="specialist-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="specialist-modal-title"
+      >
+        <h2 id="specialist-modal-title" class="specialist-modal__title">Врач</h2>
+        <p class="specialist-modal__lead">Выберите врача — он будет указан в начале документа Word.</p>
+        <div id="specialist-modal-list" class="specialist-modal__list"></div>
+        <button type="button" class="btn btn--primary specialist-modal__close" id="specialist-modal-close">Готово</button>
+      </div>
+    </div>
+
   </body>
 </html>
