@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Полная анкета · Mental Help</title>
+    <script type="module" crossorigin src="./assets/main-CHyTS1p8.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/main-DJZ_5lsr.css">
+  </head>
+  <body class="mh-branded">
+    <script>
+      (function () {
+        function redirectIfSourceOnly() {
+          if (!location.hostname.endsWith("github.io")) return;
+          if (location.pathname.includes("/docs/")) return;
+          if (document.head.querySelector('script[src*="assets/"]')) return;
+          location.replace(new URL("docs/index.html", location.href).href);
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", redirectIfSourceOnly);
+        } else {
+          redirectIfSourceOnly();
+        }
+      })();
+    </script>
+    <noscript>
+      <div class="noscript-banner">Для работы анкеты включите JavaScript в настройках браузера.</div>
+    </noscript>
+    <header class="mh-page-brand" aria-label="Mental Help">
+      <img
+        class="mh-brand-logo"
+        src="./assets/logo.png"
+        alt="Mental Help"
+        width="132"
+        height="62"
+        decoding="async"
+      />
+    </header>
+    <div class="mh-brand-deco" aria-hidden="true">
+      <img src="./assets/brand-deco.png" alt="" width="144" height="154" decoding="async" />
+    </div>
+    <div class="layout layout--wide layout--itog">
+      <div class="mh-shell mh-shell--itog">
+        <section id="mh-step-welcome" class="instruction mh-step">
+          <header class="header" style="margin-bottom: 1rem">
+            <h1>Полная анкета</h1>
+            <p class="lead">Жалобы · анамнез жизни · анамнез заболевания · документ Word</p>
+          </header>
+          <p>
+            Анкета перед приёмом: три раздела по шагам, подсказки к вопросам. Итоговый текст для врача формируется
+            автоматически и скачивается в Word.
+          </p>
+          <ol class="mh-benefits">
+            <li><strong>Жалобы</strong> — что беспокоит сейчас.</li>
+            <li><strong>Анамнез жизни</strong> — семья, развитие, школа, работа, здоровье.</li>
+            <li><strong>Анамнез заболевания</strong> — эпизоды, лечение, обращение в клинику.</li>
+          </ol>
+          <p class="privacy-note">
+            <strong>Важно.</strong> Анкета анонимна. Ответы не отправляются на сервер; файл Word создаётся только у вас
+            в браузере.
+          </p>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--primary" id="mh-btn-welcome-next">Начать</button>
+          </div>
+        </section>
+
+        <section id="mh-step-doctor" class="instruction mh-step" hidden>
+          <h2 class="mh-block-title">Выбор врача</h2>
+          <p>Укажите врача — он будет указан в шапке документа Word.</p>
+          <div class="specialist-bar" id="specialist-bar" style="margin-top: 1rem">
+            <p class="specialist-bar__title">Выберите врача</p>
+            <div class="specialist-bar__row">
+              <button
+                type="button"
+                class="btn btn--ghost"
+                id="btn-specialist"
+                aria-haspopup="dialog"
+                aria-controls="specialist-modal"
+              >
+                Врач
+              </button>
+              <span class="specialist-current" id="specialist-current">Не выбран</span>
+            </div>
+          </div>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--ghost" id="mh-btn-doctor-back">Назад</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-doctor-next">Далее</button>
+          </div>
+        </section>
+
+        <section id="mh-step-gender" class="instruction mh-step" hidden>
+          <h2 class="mh-block-title">Пол</h2>
+          <p>Нужен для грамотных формулировок в отчёте (обращался / обращалась и т.д.).</p>
+          <fieldset class="test-step-gender__fieldset">
+            <legend class="test-step-gender__legend">Пол</legend>
+            <div class="test-step-gender__options">
+              <label>
+                <input type="radio" name="patient-gender" value="male" />
+                <span>Мужской</span>
+              </label>
+              <label>
+                <input type="radio" name="patient-gender" value="female" />
+                <span>Женский</span>
+              </label>
+            </div>
+          </fieldset>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--ghost" id="mh-btn-gender-back">Назад</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-gender-next">Далее</button>
+          </div>
+        </section>
+
+        <section id="mh-step-wizard" class="instruction mh-step" hidden>
+          <nav class="mh-itog-categories" id="mh-itog-categories" aria-label="Разделы анкеты" hidden>
+            <button type="button" class="mh-itog-cat" data-cat="complaints" disabled>
+              <span class="mh-itog-cat__num">1</span>Жалобы
+            </button>
+            <button type="button" class="mh-itog-cat" data-cat="life" disabled>
+              <span class="mh-itog-cat__num">2</span>Анамнез жизни
+            </button>
+            <button type="button" class="mh-itog-cat" data-cat="disease" disabled>
+              <span class="mh-itog-cat__num">3</span>Анамнез болезни
+            </button>
+          </nav>
+          <p class="mh-progress" id="mh-progress" aria-live="polite"></p>
+          <div id="mh-wizard-content"></div>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap" hidden>
+            <h3 class="mh-word-life-preview__title">Предпросмотр текста для Word</h3>
+            <p class="mh-word-life-preview__hint">Все три раздела. Обновляется при заполнении полей.</p>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview"></pre>
+          </div>
+          <div class="mh-actions">
+            <button type="button" class="btn btn--ghost" id="mh-btn-wizard-back">Назад</button>
+            <button type="button" class="btn btn--primary" id="mh-btn-wizard-next">Далее</button>
+          </div>
+        </section>
+
+        <section class="results results--bai mh-step" id="results" hidden>
+          <h2>Готово</h2>
+          <p class="result-card__hint">Скачайте документ Word с заполненной анкетой.</p>
+          <div class="mh-word-life-preview" id="mh-unified-word-preview-wrap-results">
+            <h3 class="mh-word-life-preview__title">Текст для Word</h3>
+            <pre class="mh-word-life-preview__body" id="mh-unified-word-preview-results"></pre>
+          </div>
+          <div class="results__actions">
+            <button type="button" class="btn btn--primary" id="btn-download">Скачать анкету (Word)</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="footer footer--disclaimer mh-site-footer">
+      Данные не сохраняются на сервере. Анкета не заменяет очную консультацию специалиста.
+    </footer>
+
+    <div class="specialist-modal" id="specialist-modal" hidden aria-hidden="true">
+      <div class="specialist-modal__backdrop" aria-hidden="true"></div>
+      <div
+        class="specialist-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="specialist-modal-title"
+      >
+        <h2 id="specialist-modal-title" class="specialist-modal__title">Врач</h2>
+        <p class="specialist-modal__lead">Выберите врача — он будет указан в начале документа Word.</p>
+        <div id="specialist-modal-list" class="specialist-modal__list"></div>
+        <button type="button" class="btn btn--primary specialist-modal__close" id="specialist-modal-close">Готово</button>
+      </div>
+    </div>
+
+  </body>
+</html>
