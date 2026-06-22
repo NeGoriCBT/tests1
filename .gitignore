@@ -1,3 +1,13 @@
 node_modules
 dist
 .DS_Store
+
+# botzap secrets / local data
+botzap-deploy/credentials.json
+botzap-deploy/.env
+botzap-deploy/.botzap.lock
+botzap-deploy/appointments.db
+botzap-deploy/bot.log
+botzap-deploy/mihomo-config.yaml
+backup/
+exports/

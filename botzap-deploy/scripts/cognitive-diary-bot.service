@@ -1,0 +1,17 @@
+[Unit]
+Description=Cognitive Diary Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/macd/cognitive-diary-bot
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/macd/cognitive-diary-bot/venv/bin/python /home/macd/cognitive-diary-bot/main.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/macd/cognitive-diary-bot/bot.log
+StandardError=append:/home/macd/cognitive-diary-bot/bot.log
+
+[Install]
+WantedBy=default.target

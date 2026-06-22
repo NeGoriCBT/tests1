@@ -1,0 +1,16 @@
+[Unit]
+Description=Mihomo proxy (Telegram / Google)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/macd/mihomo
+ExecStart=/home/macd/mihomo/mihomo -d /home/macd/mihomo
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/macd/mihomo/mihomo.log
+StandardError=append:/home/macd/mihomo/mihomo.log
+
+[Install]
+WantedBy=default.target

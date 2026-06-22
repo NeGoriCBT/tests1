@@ -1,0 +1,17 @@
+[Unit]
+Description=BotZap appointment Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/macd/botzap
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/macd/botzap/venv/bin/python /home/macd/botzap/main.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/macd/botzap/bot.log
+StandardError=append:/home/macd/botzap/bot.log
+
+[Install]
+WantedBy=default.target
